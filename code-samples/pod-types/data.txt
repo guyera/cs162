@@ -1,0 +1,5 @@
+City,Population
+Corvallis,61993
+Eugene,178786
+Salem,180406
+Portland,635749

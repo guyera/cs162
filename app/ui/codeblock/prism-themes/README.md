@@ -1,0 +1,1 @@
+All prism themes included in this directory are licensed under the MIT license. See `License`. They were downloaded from [here](https://github.com/PrismJS/prism-themes). Some of them have been modified from their original source.
