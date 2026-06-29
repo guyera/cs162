@@ -69,8 +69,9 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
         <Item><Link href="#maintainability">Maintainability</Link></Item>
         <Item><Link href="#encapsulation">Encapsulation</Link></Item>
         <Item><Link href="#coupling">Coupling</Link></Item>
-        <Item><Link href="#reigning-in-coupling">Reigning in coupling</Link></Item>
-        <Item><Link href="#private-attributes-and-methods">Private attributes and methods</Link></Item>
+        <Item><Link href="#reducing-coupling">Reducing coupling</Link></Item>
+        <Item><Link href="#private-attributes">Private attributes</Link></Item>
+        <Item><Link href="#private-methods">Private methods</Link></Item>
         <Item><Link href="#class-invariants">Class invariants</Link></Item>
         <Item><Link href="#getters-and-setters">Getters and setters</Link></Item>
       </Itemize>
@@ -83,7 +84,7 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
 
       <P>When you set out to write some code to solve a problem, there are often countless different approaches that would all <It>work</It>. Just take our labs and homework assignments, for example. Even in a class with hundreds of students, it's incredibly unlikely that two students would write the exact same code to solve one of these problems.</P>
 
-      <P>When considering all these different approaches, how do we choose between them? What makes one approach "better" or "worse" than another? This is a natural question to ask, and software engineers have been thinking about it for decades. But it's a very complicated question with a very complicated answer; there are many properties that distinguish "good code" from "bad code" (so to speak). Sometimes, these properties can even run counter to one another in some sort of tradeoff, and the software engineer has to prioritize between them.</P>
+      <P>When considering all these different approaches, how do we choose between them? What makes one approach "better" or "worse" than another? This is a natural question to ask, and software engineers have been thinking about it for decades. But it's a very complicated question with a very complicated answer; there are many properties that distinguish "good code" from "bad code" (so to speak). Often times, these properties can even run counter to one another in some sort of tradeoff, and the software engineer has to prioritize between them.</P>
 
       <P>But this isn't a software engineering course, so we don't have time to discuss the many properties of quality software design. Instead, we'll just focus on one of them: <Bold>maintainability</Bold>. As you might have guessed, maintainability describes how easy or hard it is to maintain a codebase, such as adding, removing, or changing features.</P>
 
@@ -93,7 +94,7 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
 
       <SectionHeading id="encapsulation">Encapsulation</SectionHeading>
 
-      <P>There are many tools and techniques that software engineers can use to improve a codebase's maintainability. One such tool is known as <Bold>encapsulation</Bold>. If you ask 100 software engineers exactly what "encapsulation" is, you'll get 100 different answers (partly for historical reasons<Emdash/>encapsulation has often been entangled with some other techniques, such as information hiding and message passing, so the definitions of these terms often get jumbled together in messy ways). But the definition I'm going to go with is as follows: encapsluation means co-location, or bundling together, of data with the behavior that operates on that data.</P>
+      <P>There are many tools and techniques that software engineers can use to improve a codebase's maintainability. One such tool is known as <Bold>encapsulation</Bold>. If you ask 100 software engineers exactly what "encapsulation" is, you'll get 100 different answers (partly for historical reasons<Emdash/>encapsulation has often been entangled with some other techniques, such as information hiding and message passing, so the definitions of these terms often get jumbled together in messy ways). But the definition I'm going to go with is as follows: encapsluation means isolated co-location, or bundling together, of data with the behavior that operates on that data.</P>
 
       <P>The canonical example of encapsulation is classes and objects (but this certainly isn't the only example). Classes and objects are such a classic example of encapsulation that the term <Bold>object-oriented programming</Bold> is sometimes equated to encapsulation (depending on who you ask). As we've discussed, one common definition of objects, especially in the context of object-oriented programming, is a thing that has both state ("data"; e.g., attributes) and behavior (e.g., methods). The object's methods "operate on" (i.e., do things with) the object's attributes. Importantly, this data and behavior<Emdash/>the attributes and methods<Emdash/>are all defined in the same place: inside the class definition. Hence, the data (the attributes) are co-located (bundled) with the behaviors (the methods) that operate on that data. That's encapsulation.</P>
 
@@ -115,9 +116,29 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
 `
       }</PythonBlock>
 
-      <P>Every <Code>Dog</Code> object has two attributes: <Code>name</Code> and <Code>birth_year</Code>. Suppose we have a <Code>Dog</Code> object called <Code>spot</Code>, and we want to "operate on" <Code>spot</Code>'s attributes. This is what <Code>spot</Code>'s methods are for. For example, when we first create <Code>spot</Code>, we need to assign values to <Code>spot</Code>'s attributes. We do this with the constructor. And afterwards, we might want to print <Code>spot</Code>'s attributes to the terminal. We do this with <Code>spot</Code>'s <Code>print()</Code> method (i.e., <Code>spot.print()</Code>). These methods are defined next to (co-located with) the attributes that they operate on, so this is an example of encapsulation. </P>
+      <P>Every <Code>Dog</Code> object has two attributes: <Code>name</Code> and <Code>birth_year</Code>. Suppose we have a <Code>Dog</Code> object called <Code>spot</Code>, and we want to "operate on" <Code>spot</Code>'s attributes. This is what <Code>spot</Code>'s methods are for. For example, when we first create <Code>spot</Code>, we need to assign values to <Code>spot</Code>'s attributes. We do this with the constructor. And afterwards, we might want to print <Code>spot</Code>'s attributes to the terminal. We do this with <Code>spot</Code>'s <Code>print()</Code> method (i.e., <Code>spot.print()</Code>). These methods are defined next to (co-located with) the attributes that they operate on, so this is an example of encapsulation.</P>
 
-      <P>We generally prefer encapsulation of data which belongs together. Data which is highly related should be grouped together, and data which is not very similar could potentially be part of a different class. The degree to which related data is encapsulated with each other and separate from unrelated data is called <Bold>cohesion</Bold>. We generally prefer code which is <Bold>higly cohesive</Bold>.</P>
+      <P>A counterexample to encapsulation might look like this:</P>
+
+      <PythonBlock fileName="noencapsulation.py">{
+`from dog import Dog
+
+def main() -> None:
+    spot = Dog('', 0)
+    spot.name = 'Spot'
+    spot.birth_year = 2019
+    print(f'{spot.name} was born in {spot.birth_year}')
+
+if __name__ == '__main__':
+    main()
+`
+      }</PythonBlock>
+
+      <P>In this case, the <Code>main</Code> function reaches inside the <Code>Dog</Code> object, <Code>spot</Code>, and directly operates on (accesses) its <Code>name</Code> and <Code>birth_year</Code> attributes, both for initializing them and printing them. This is code is <Ul>not</Ul> well-encapsulated.</P>
+
+      <P>Moreover, simply putting everything in one gigantic class or other code component is <It>not</It> encapsulation. Yes, technically the attributes would all be co-located with the behaviors that operate on them, but not in an <It>isolated</It> manner<Emdash/>you'd have tons of attributes co-located with behaviors that have nothing to do with them.</P>
+
+      <P>A related concept to encapsulation is that of <Bold>cohesion</Bold>, which is a measure of how closely related the various responsibilities are within a given module, class, or other component. It's often said that a good class design should be highly cohesive, meaning that its data (attributes) and behaviors (methods) should be closely related to one another.</P>
 
       <SectionHeading id="coupling">Coupling</SectionHeading>
 
@@ -128,95 +149,496 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
         <Item><P>Encapsulation can enable class invariants</P></Item>
       </Enumerate>
 
-      <P>Let's focus on coupling for now. <Link href="#class-invariants">We'll cover class invariants in a moment</Link>.</P>
+      <P>Let's focus on coupling for now. <Link href="#class-invariants">We'll cover class invariants in a bit</Link>.</P>
 
-      <P><Bold>Coupling</Bold>, like encapsulation, is a bit subjective. However, there is a theme among the various definitions: coupling, in some sense or another, refers to the case where changing one component of code requires changing one or more other components of code in turn. This is a somewhat vague definition, but it's good enough for our use case.</P>
+      <P>The definition of <Bold>coupling</Bold>, like that of encapsulation, is a bit subjective. However, there's a theme among the various definitions: coupling, in some sense or another, refers to a case where changing one component of code requires changing one or more other components of code in turn. This is a somewhat vague definition, but it's good enough for our use case.</P>
 
-      <P>If you ask 100 software engineers, you'll get 100 different definitions. (I once watched <Link href="https://www.youtube.com/watch?v=hd0v72pD1MI">an entire podcast</Link> about coupling and cohesion consisting of various highly regarded software engineers, including the likes of Kent Beck, Jim Weirich, and Ron Jeffries, and, even by the end of the podcast, they had mostly failed to agree on a unified definition of what these terms mean).</P>
-
-      <P>Not all coupling is the same. For one, there are different degrees of coupling. If two components of code are <Bold>tightly coupled</Bold>, that means one is highly dependent on the other (and possibly vice-versa as well), so changing one will almost always require changing the other. In contrast, if two components of code are <Bold>loosely coupled</Bold>, that means they are only loosely dependent on one another, so changing one may or may not require changing the other.</P>
-
-      <P>We generally prefer <Bold>loose coupling</Bold> over tight coupling.</P>
+      <P>Not all coupling is the same. For one, there are different degrees of coupling. If two components of code are <Bold>tightly coupled</Bold>, that means one is highly dependent on the other (and possibly vice-versa as well), so changing one will almost always require changing the other. In contrast, if two components of code are <Bold>loosely coupled</Bold>, that means one is only loosely dependent on the other (and possibly vice-versa), so changing one may or may not require changing the other.</P>
 
       <P>Coupling can also be <Bold>local</Bold> or <Bold>pervasive</Bold>. These are not widely accepted terms (I think I just made them up), but I think they're useful, so I'll use them anyways. Under my definitions, local coupling is when a small, controlled number of adjacent code components are coupled together, whereas pervasive coupling is when a given code component is coupled to countless other code components throughout the entire codebase (and, perhaps more importantly, pervasive coupling tends to get worse over time as the codebase gets more complex, but local coupling is mostly fixed; this is a result of <Link href="https://en.wikipedia.org/wiki/Open%E2%80%93closed_principle">Bertrand Meyer's open-closed principle</Link> of object-oriented software design).</P>
 
-      <P>In many cases, coupling can make code hard to maintain (e.g., hard to change, hard to add to, hard to remove, etc). For example, suppose we have a class named <Code>Person</Code>, and every person has a name and an age:</P>
+      <P>In many cases, coupling can make code hard to maintain (e.g., hard to change, hard to add to, hard to remove, etc). For example, suppose you're part of a hobbyist rocketry team, and you're in charge of programming the rocket's flight computer. Maybe you have a <Code>Vector3</Code> class that represents an x, y, and z coordinate (perhaps a location in 3D space, or a velocity vector, or an acceleration vector, etc):</P>
 
-      <PythonBlock fileName="person.py">{
-`class Person:
-    name: str
-    age: int
-
-    def __init__(self, name: str, age: int) -> None:
-        self.name = name
-        self.age = age
-`
-      }</PythonBlock>
-
-      <P>Suppose we also have a class named <Code>PersonDatabase</Code>, and every person database has a list of people (which is initially empty):</P>
-
-      <PythonBlock fileName="persondatabase.py">{
-`from person import Person
-
-class PersonDatabase:
-    people: list[Person]
+      <PythonBlock fileName="vector3.py">{
+`class Vector3:
+    x: float
+    y: float
+    z: float
 
     def __init__(self) -> None:
-        self.people = []
+        # All zeros by default
+        self.x = 0
+        self.y = 0
+        self.z = 0
 `
       }</PythonBlock>
 
-      <P>Now suppose that, throughout our program, we often find ourselves needing to add <Code>Person</Code> objects to one or more databases. For example, suppose we have several lines of code that look something like these:</P>
+      <P>And maybe you have a <Code>Rocket</Code> class like this one:</P>
 
-      <PythonBlock copyable={false} showLineNumbers={false}>{
-`joe = Person("Joe", 42)
-my_database.people.append(joe)
+      <PythonBlock fileName="rocket.py">{
+`from vector3 import Vector3
 
-liang = Person("Liang", 23)
-my_database.people.append(liang)
-
-# And so on...`
-      }</PythonBlock>
-
-      <P>And perhaps, throughout our program, we occasionally find ourselves needing to retrieve the age of a person with a given name from the database. For example, suppose we have several blocks of code that look something like this:</P>
-
-      <PythonBlock copyable={false} showLineNumbers={false}>{
-`for p in my_database.people:
-    if p.name == "Joe":
-        print(f"Joe's age is {p.age}")
-        break
+class Rocket:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
 `
       }</PythonBlock>
 
-      <P>And lastly, perhaps, throughout our program, we occasionally find ourselves needing to retrieve the name of a person with a given age. For example, suppose we have several blocks of code that look something like this:</P>
+      <P>Now suppose that, throughout the program, you find yourself needing to interact with the rocket's data in various ways for various reasons. Perhaps, every few seconds, the program receives updates about the rocket's current position from a GPS module, at which point a new <Code>Vector3</Code> object should be appended to the rocket's <Code>gps_flight_path</Code> list attribute to reflect the new position:</P>
 
-      <PythonBlock copyable={false} showLineNumbers={false}>{
-`print('People who are 42 years of age:')
-for p in my_database.people:
-    if p.age == 42:
-        print(f'\\t{p.name}')
+      <PythonBlock fileName="rocket.py" highlightLines="{16-27}">{
+`from vector3 import Vector3
+
+class Rocket:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+    def query_gps(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
 `
       }</PythonBlock>
 
-      <P>Perhaps all the above code <It>works</It>, but consider: as this program grows in complexity (and perhaps becomes more successful / popular, garnering more users, etc), the size of the person databases will likely grow as well. In each of the above examples, <Code>my_database</Code> might have, say, millions of people in it. At a certain point, simply using a for loop to iterate over every single person in the database, looking for all the people with a given name or age, might no longer be a good idea; such for loops can be extremely slow when iterating over a gigantic list.</P>
+      <P>Perhaps the rocket steers through active fin actuation (e.g., adjusting the orientations of the fins via servo motors). Then the flight computer will need some code to tell it how and when to reorient, the calculations of which depend on the rocket's current trajectory (position and velocity):</P>
 
-      <P>So, when that day comes, how do we speed up the program? There are many techniques you will learn in your computer science education. In order to implement any optimizations, we'll almost surely have to rewrite most if not <It>all</It> of the above code.</P>
+      <PythonBlock fileName="rocket.py" highlightLines="{29-48}">{
+`from vector3 import Vector3
 
-      <P>For example, one way of speeding up a searching process is to use a binary search rather than a linear search. We might discuss the binary search algorithm later on in the term, but to give you a very general idea, it's a searching algorithm that searches through a <Ul>sorted list</Ul> to find a given value. It's much faster than a naive for loop (i.e., a linear search). However, it requires that the list be sorted ahead of time. To use a binary search to find a person with a certain name, you'd need a list of people sorted (e.g., alphabetically) by their names. And to use a binary search to find the people with a given age, you'd need another <It>separate</It> list of people sorted (e.g., in ascending order) by their ages. To implement this idea, we'd have to rewrite both of the above for loops, replacing them with a binary search implementation. But beyond that, we'd also have to change how we add people to the database: 1) there would now be two lists of people instead of one (one sorted by name, and one sorted by age), so whenever we want to add a person to the database, we'd have to add them to <It>both</It> of these lists; and 2) we'd have to make sure to insert people in their correct places within the respective lists so that the lists remain sorted (as opposed to simply appending them to the list, as we do above). Indeed, this would require rewriting <It>all</It> of the above code.</P>
+class Rocket:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
 
-      <P>(There are other solutions as well, such as replacing our list with one or more dictionaries / hash tables, but that would have the exact same problem with regards to coupling.)</P>
+    def query_gps(self) -> None:
+        new_position = Vector3()
 
-      <P>But suppose that there are <It>hundreds</It> of places throughout our codebase where we add people to one or more person databases (i.e., lines of code that look something like <Code>my_database.people.append(joe)</Code>). If we need to change how we add people to databases (e.g., because we now have two lists instead of one, and because those lists need to remain sorted), then we need to make that change <It>everywhere</It>. That could require changing hundreds of lines of code, then. To a novice programmer, that might seem surprising. Indeed, to the untrained eye, <Code>my_database.people.append(joe)</Code> might look fairly innocuous, but it can actually lead to a maintainability nightmare.</P>
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
 
-      <P>This is all a result of unchecked coupling. The lines of code such as <Code>my_database.people.append(joe)</Code> are tightly coupled to the representation of people within the <Code>PersonDatabase</Code> class. Hence, if we want to change that representation (e.g., to replace the unsorted <Code>people</Code> list with two separate sorted lists), we would also have to change those hundreds of lines of code that are coupled to it. Similarly, all our for loops that search through a <Code>PersonDatabase</Code>'s <Code>people</Code> list to find people with a certain name or age are <It>also</It> tightly coupled to this representation. So changing the representation would require rewriting all those for loops as well.</P>
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
 
-      <P>In particular, this is an example of tight, pervasive coupling<Emdash/>many components of code sprawled throughout our entire codebase are tightly coupled to the representation of people within the <Code>PersonDatabase</Code> class. That makes it extremely difficult to change that representation; changing it would require changing the hundreds of other lines of code that are all coupled to it.</P>
+    def actuate_fins(self) -> None:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
 
-      <P>You might also notice that the <Code>PersonDatabase</Code> class is not very well encapsulated. There are countless lines of code sprawled throughout the codebase that directly operate on the <Code>people</Code> attribute (e.g., <Code>my_database.people.append(joe)</Code>), and none of those lines of code are co-located (bundled) with the <Code>people</Code> attribute (i.e., none of those lines of code are in methods of the <Code>PersonDatabase</Code> class). We'll explore this more in the next section.</P>
+        # Here, we would somehow use current_position and
+        # current_velocity to determine how the fins should be actuated
+        # so as to guide the rocket along the target trajectory.
+        # That's beyond the scope of this course, so use your
+        # imagination here as well.
+        # ...
+`
+      }</PythonBlock>
 
-      <SectionHeading id="reigning-in-coupling">Reducing coupling</SectionHeading>
+      <P>At some point, the flight computer will need to deploy the rocket's parachute. This decision also depends on the rocket's current trajectory:</P>
 
-      <P>I said that encapsulation can help "reduce" coupling, but what does that mean?</P>
+      <PythonBlock fileName="rocket.py" highlightLines="{54-82,9,17-18}">{
+`from vector3 import Vector3
+
+class Rocket:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    deployed_parachute: bool
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+        # Parachute initially undeployed
+        self.deployed_parachute = False
+
+    def query_gps(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
+
+    def actuate_fins(self) -> None:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Here, we would somehow use current_position and
+        # current_velocity to determine how the fins should be actuated
+        # so as to guide the rocket along the target trajectory.
+        # That's beyond the scope of this course, so use your
+        # imagination here as well.
+        # ...
+
+    def deploy_parachute_if_ready(self) -> None:
+        if self.deployed_parachute:
+            # Parachute has already been deployed. Do nothing.
+            return
+
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Let's say the parachute is meant to be deployed at
+        # apogee (peak of trajectory). Let's say the y coordinate
+        # dimension represents elevation. Then we should deploy the
+        # parachute when the y coordinate of current_velocity becomes
+        # non-positive (when the rocket is no longer moving upward)
+        if current_velocity.y <= 0:
+            # Here, we would somehow engage with the hardware to
+            # deploy the parachute. Again, use your imagination.
+            # ...
+
+            self.deployed_parachute = True
+`
+      }</PythonBlock>
+
+      <P>And perhaps the rocket continuously sends data about its current trajectory back to a receiver on the ground for logging and monitoring:</P>
+
+      <PythonBlock fileName="rocket.py" highlightLines="{84-101}">{
+`from vector3 import Vector3
+
+class Rocket:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    deployed_parachute: bool
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+        # Parachute initially undeployed
+        self.deployed_parachute = False
+
+    def query_gps(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
+
+    def actuate_fins(self) -> None:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Here, we would somehow use current_position and
+        # current_velocity to determine how the fins should be actuated
+        # so as to guide the rocket along the target trajectory.
+        # That's beyond the scope of this course, so use your
+        # imagination here as well.
+        # ...
+
+    def deploy_parachute_if_ready(self) -> None:
+        if self.deployed_parachute:
+            # Parachute has already been deployed. Do nothing.
+            return
+
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Let's say the parachute is meant to be deployed at
+        # apogee (peak of trajectory). Let's say the y coordinate
+        # dimension represents elevation. Then we should deploy the
+        # parachute when the y coordinate of current_velocity becomes
+        # non-positive (when the rocket is no longer moving upward)
+        if current_velocity.y <= 0:
+            # Here, we would somehow engage with the hardware to
+            # deploy the parachute. Again, use your imagination.
+            # ...
+
+            self.deployed_parachute = True
+
+    def log_data(self) -> None:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Here, we would somehow send current_position and
+        # current_velocity to the ground receiver for monitoring.
+        # Use your imagination.
+        # ...
+`
+      }</PythonBlock>
+
+      <P>Suppose you test the above code in a flight simulation and find that it works as intended. You proceed to deploy it to the rocket's flight computer, and the team runs its first test flight. During the test flight, one of your teammates notices that the rocket steers somewhat sporadically at high altitudes, and that the parachute is deployed earlier than it should've been. You analyze the data sent back by the rocket during the flight and discover that the position data streamed from the GPS module is extremely noisy and unreliable when the rocket is at high altitudes.</P>
+
+      <P>Your team does some research and learns that this is a well-known limitation of most GPS modules. As such, you conclude that the rocket's guidance system shouldn't be informed purely by GPS data. Rather, the rocket should be equipped with additional sensors, such as a accelerometers and gyroscopes, and the guidance system should incorporate information from all these sensors.</P>
+
+      <P>(Okay, perhaps it's somewhat unrealistic that your team wouldn't have incorporated these sensors to begin with, given that they're extremely standard, but this is all academic).</P>
+
+      <P>Your team orders an accelerometer, and you begin updating the guidance system's code. First, you introduce new attributes to store the data sourced from the accelerometer:</P>
+
+      <PythonBlock fileName="rocket.py" highlightLines="{11-20,31-34,49-63}">{
+`from vector3 import Vector3
+
+class Rocket:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    deployed_parachute: bool
+
+    # Rocket's current acceleration as sourced from the
+    # accelerometer
+    acceleration: Vector3
+
+    # We'll also keep track of a running estimate of the rocket's
+    # velocity and position, periodically updating them based on its
+    # acceleration at the given point in time (i.e., approximating
+    # velocity and position through integration).
+    velocity: Vector3
+    position: Vector3
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+        # Parachute initially undeployed
+        self.deployed_parachute = False
+
+        # Acceleration, velocity, and position all start as zero-vectors
+        self.acceleration = Vector3()
+        self.velocity = Vector3()
+        self.position = Vector3()
+
+    def query_gps(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
+
+    def query_accelerometer(self) -> None:
+        # Here, we would somehow query the rocket's current
+        # acceleration from the accelerometer and update
+        # self.acceleration accordingly
+        # Use your imagination.
+        # ...
+
+        # Now, update velocity and position accordingly (note: this is
+        # an oversimplification)
+        self.velocity.x += self.acceleration.x
+        self.velocity.y += self.acceleration.y
+        self.velocity.z += self.acceleration.z
+        self.position.x += self.velocity.x
+        self.position.y += self.velocity.y
+        self.position.z += self.velocity.z
+
+    def actuate_fins(self) -> None:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Here, we would somehow use current_position and
+        # current_velocity to determine how the fins should be actuated
+        # so as to guide the rocket along the target trajectory.
+        # That's beyond the scope of this course, so use your
+        # imagination here as well.
+        # ...
+
+    def deploy_parachute_if_ready(self) -> None:
+        if self.deployed_parachute:
+            # Parachute has already been deployed. Do nothing.
+            return
+
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Let's say the parachute is meant to be deployed at
+        # apogee (peak of trajectory). Let's say the y coordinate
+        # dimension represents elevation. Then we should deploy the
+        # parachute when the y coordinate of current_velocity becomes
+        # non-positive (when the rocket is no longer moving upward)
+        if current_velocity.y <= 0:
+            # Here, we would somehow engage with the hardware to
+            # deploy the parachute. Again, use your imagination.
+            # ...
+
+            self.deployed_parachute = True
+
+    def log_data(self) -> None:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+        
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Here, we would somehow send current_position and
+        # current_velocity to the ground receiver for monitoring.
+        # Use your imagination.
+        # ...
+`
+      }</PythonBlock>
+
+      <P>Looks great! Now there's just one more issue: the rocket is still using its GPS flight path to approximate its trajectory for the sake of fin actuation, parachute deployment, and telemetry (logging / monitoring). Assuming the trajectories computed from the accelerometer data are more reliable, the code should be updated to use them instead.</P>
+
+      <P>Except... That <It>isn't</It> just one more issue. It's three: 1) updating the fin-actuation code to use the new accelerometer-based trajectories; 2) updating the parachute-deployment code to use the new accelerometer-based trajectories; and 3) updating the telemetry / logging code to use the new accelerometer-based trajectories.</P>
+
+      <P>Fine, we can handle that. Three small issues still isn't that big of a deal. But consider: the above code is a toy program. Real guidance systems are substantially more complicated than this, even in amateur rocketry. In a real guidance system, there might not just be three components of code that need updating, but rather three <It>hundred</It>. That's a much bigger deal, especially given that this change <It>should</It> be simple. After all, we're just trying to exchange one data source (GPS) for another (accelerometer). Why should that require changes to several code components sprawled throughout our entire codebase?</P>
+
+      <P>This is an example of tight, pervasive coupling. The way the codebase is written, many of the rocket's features are tightly coupled to the <Code>gps_flight_path</Code> attribute. If we want to change those features to instead source the trajectory data from the new accelerometer-based attributes, that will require a lot of changes due to all this coupling.</P>
+
+      <P>Put another way, much of our codebase is not just dependent on the rocket's <It>trajectories</It>, but rather <It>a very specific representation of its trajectories</It> (<Code>gps_flight_path</Code>). Dependencies induce coupling (more on this shortly), so this means our codebase is tightly and pervasively coupled to this representation, making it difficult to change. And that's precisely what we're trying to do.</P>
+
+      <P>What's more, this was all very predictable. Representations are <It>design decisions</It>, and most design decisions aren't fundamental or definitional to the project's goals. They're just one way of <It>accomplishing</It> those goals. Indeed, there are often infinitely many ways to represent a given concept in code, and in the beginning, many of these representations will all seem equally valid, so you just choose one and go with it (i.e., you make a design decision). But later, as the project evolves, another representation might become more appealing (e.g., like exchanging one data structure for another for performance reasons; or like exchanging one data source for another to leverage new hardware, as in this rocketry example). When that day comes, you'll have to change the representation.</P>
+
+      <P>Such is the nature of many design decisions<Emdash/>they're often extremely fragile, perhaps based on limited knowledge or experience, or engineered to fit a feature's overly simple requirements in the early phases of its development. Over time, the engineers will gain more knowledge and experience, and the feature or project will evolve new requirements, at which point those early design decisions may no longer make sense and will have to be updated. If the codebase is tightly and pervasively coupled to those design decisions, then you'll be in for a reckoning when that day inevitably comes.</P>
+
+      <P>So, what can we do about it?</P>
+
+      <SectionHeading id="reducing-coupling">Reducing coupling</SectionHeading>
+
+      <P>Luckily, there are some tools that you can use when designing a codebase to protect yourself from potential issues of coupling (especially if you can predict those issues ahead of time, as we should have been able to do in this case). Earlier, I said that encapsulation is one such tool. What did I mean by that?</P>
 
       <P>First, understand that some coupling is inevitable. Your functions, data, and classes exist to interact with each other. At the very least, coupling occurs between all direct <Bold>dependencies</Bold>. A dependency is just a component of code that another component of code depends / relies on. Dependencies are <It>everywhere</It>. Whenever one function A calls another function B, that's a dependency<Emdash/>A depends on B. Whenever a class A defines an attribute of some other class type B, that's a dependency (again, A depends on B). Even within a single function, there are plenty of dependencies. If a line of code prints the value of the variable <Code>x</Code>, then that print statement depends on <Code>x</Code> having previously been defined<Emdash/>that's a dependency between two lines of code. This clearly cannot be avoided.</P>
 
@@ -227,278 +649,659 @@ for p in my_database.people:
     return a + b * (a - b) ** 2.5`
       }</PythonBlock>
 
-      <P>In order to call the <Code>foo</Code> function (i.e., in order to interact with it), you need to know its name, its parameter list, its return type, the meanings of its parameters and return value, the types of any exceptions it might throw, and so on. All of these things make up the <Code>foo</Code> function's interface. This is in contrast to the <Code>foo</Code> function's <Bold>implementation</Bold>. An implementation is simply the parts of a code component that <It>aren't</It> part of its interface. In the case of functions, the implementation is given by the function body (you don't need to know <It>how</It> <Code>foo</Code> works in order to call it<Emdash/>you only need to know <It>what</It> it does).</P>
+      <P>In order to call the <Code>foo</Code> function (i.e., in order to interact with it), you need to know its name, its parameter list, its return type, the meanings of its parameters and return value, the types of any exceptions it might throw, and so on. All of these things make up the <Code>foo</Code> function's interface. This is in contrast to the <Code>foo</Code> function's <Bold>implementation</Bold>. An implementation is simply the parts of a code component that <It>aren't</It> part of its interface. In the case of a function, the implementation is given by the function body.</P>
 
-      <P>Because dependencies interact with each other through their interfaces, changing a code component's interface requires changing how other components (specifically its dependents) interact with it (in contrast, changing a component's implementation generally does not require changing how other components interact with it). Keeping with our example, if I wanted to change the name of <Code>foo</Code> to <Code>bar</Code>, I'd have to change how I reference it in each and every <Code>foo</Code> function call. Or if I wanted to add a third parameter, I'd also have to add a third argument in each and every <Code>foo</Code> function call. (But if I wanted to change its <It>body</It><Emdash/>its implementation<Emdash/>I would not need to change how I call it). That's all to say, coupling inherently occurs at interfaces, and dependencies inherently interact with each other through their interfaces. Therefore, dependencies inherently create coupling, and this is inevitable.</P>
+      <P>Put another way, an interface describes the <It>what</It> of a code component, sometimes referred to as a <Bold>contract</Bold>: the component's responsibilities, the semantics of its inputs and outputs, and so on. The implementation describes the <It>how</It> of a code component, meaning how it fulfill its contract. Interacting with a component requires understanding the what (interface), but not the how (implementation).</P>
 
-      <P>However, some coupling is essentially "unnecessary" and can be mitigated with better software design. For example, if a single block of code is copied and pasted many times over, then the coupling between it and its external dependencies is essentially replicated many times over as well. Moving the shared logic into a function and simply calling that function many times over can help reduce much of that unnecessary coupling.</P>
+      <P>Because dependencies interact with each other through their interfaces, changing a code component's interface requires changing how other components (specifically its dependents) interact with it. In contrast, changing a component's implementation generally does not require changing how other components interact with it (unless, say, changing the implementation requires changing its interface in turn). Keeping with our example, if I wanted to change the name of <Code>foo</Code> to <Code>bar</Code>, I'd have to change how I reference it in each and every <Code>foo()</Code> function call. Or if I wanted to add a third parameter, I'd also have to add a third argument to each and every <Code>foo()</Code> function call. But if I only wanted to change its <It>body</It><Emdash/>its implementation<Emdash/>I would not need to change how I call it. That's all to say, dependencies inherently interact with each other through their interfaces, which induces coupling against said interfaces. Therefore, dependencies inherently create coupling, and this is all inevitable.</P>
 
-      <P>Next, understand that coupling is not inherently evil; it only makes code harder to change. But remember that there are various forms and degrees of coupling. A component of code that's subject to tight, pervasive coupling is going to be much harder to change than a component of code that's subject to loose, local couplng.</P>
+      <P>Although some coupling is inevitable, it isn't inherently evil. It can be problematic in that it makes code harder to change, but consider that not all code <It>needs</It> to be easy to change. If a code component is particularly "stable"<Emdash/>if you're rarely or never going to need to change it<Emdash/>then perhaps it doesn't matter too much if it's hard to change. As I mentioned, many design decisions are fragile and volatile, so <It>not</It> stable. But many other decisions are more fundamental, or definitional, to the project's goals, and therefore much more stable. Perhaps tight, pervasive coupling against such decisions isn't such a big deal.</P>
 
-      <P>With all that in mind, encapsulation can help us "reduce", or "manage" coupling in various ways:</P>
+      <P>Moreover, remember that there are various forms and degrees of coupling. Loose, local coupling is likely to be less problematic than tight, pervasive coupling.</P>
+
+      <P>With these things in mind, encapsulation (and other coupling-mitigating tools) can't eliminate all coupling. That would be impossible. However, encapsulation can help with coupling in more nuanced (but powerful) ways:</P>
 
       <Enumerate listStyleType="decimal">
-        <Item><P>It groups related things together (particularly, data and the behavior operating on that data), which keeps much of the relevant coupling contained in one place. This makes it easier to find all the coupled code that needs to be changed.</P></Item>
-        <Item><P>By grouping related things together, it makes unnecessary coupling more apparent / easier to notice, which allows us to eliminate or reduce it.</P></Item>
-        <Item><P>It can be enforced (strictly, in some programming languages) via <Link href="#private-attributes-and-methods">private attributes and methods</Link>, solidifying all the above points.</P></Item>
+        <Item><P>Encapsulation groups related things together (particularly, data and the behavior operating on that data), which keeps much of the relevant coupling contained in one place (i.e., local rather than pervasive). This makes it easier to find all the coupled code that needs to be changed in a given situation. Moreover, since the coupling is isolated / local, it can't sprawl out of control across the entire codebase unnoticed.</P>
+
+        <P>Now, the methods of a class are often "public-facing", meaning they might be called from various places throughout the entire codebase. This might raise concerns of <It>new</It> pervasive coupling. However, a class's methods can often be carefully designed such that their interfaces are fairly stable, mitigating the harm of this coupling. This is a complicated topic, though; I'll show an example shortly.</P></Item>
+        <Item><P>Some coupling is "unnecessary", such as when a dependent is replicated many times in violation of the Don't Repeat Yourself (DRY) principle. By isolating related things together in a small, dedicated class, encapsulation makes such unnecessary coupling more apparent, which allows us to eliminate or reduce it.</P></Item>
+        <Item><P>Encapsulation can be enforced (strictly, in some programming languages) via <Link href="#private-attributes">private attributes</Link> and <Link href="#private-methods">private methods</Link>, solidifying the above points.</P></Item>
       </Enumerate>
 
-      <P>I think the first point is fairly clear, and we'll discuss the third point in a bit, so let's focus on the second point. I think it'll make more sense with an example, so let's consider our <Code>PersonDatabase</Code> class. I said that it wasn't very well-encapsulated since it doesn't expose methods to operate on its <Code>people</Code> attribute. Instead, we simply operate on the <Code>people</Code> attribute directly from various places throughout our codebase (e.g., <Code>my_database.people.append(joe)</Code>). That's not encapsulation. Let's rewrite this class in a way that practices encapsulation. We'll start with an extremely naive rewriting of it; we'll take all the operations in our entire codebase that we're currently doing with the <Code>people</Code> attribute, and we'll move them each into their own method within the <Code>PersonDatabase</Code> class (yes, this will be painful, but bear with me):</P>
+      <P>All the above points are amplified when working in a team on a large project. In such cases, it's uncommon for any single team member to be aware of or understand the entire codebase. This makes it much easier for coupling to sprawl out of control, for DRY violations to ensue, and so on. If the whole team respects each others' encapsulation efforts (which can often be enforced, per point 3 above), then these issues become much less common.</P>
 
-      <PythonBlock fileName="persondatabase.py">{
-`class PersonDatabase:
-    people: list[Person]
+      <P>Let's see how encapsulation can help in our rocketry example. Forget about the accelerometer for now; let's rewind back to when it was just the GPS flight path. As written, the <Code>Rocket</Code> class is trying to do everything<Emdash/>actuate the fins, deploy the parachute, conduct telemetry, <It>and</It> parse sensor data to calculate trajectories. The last part in particular is the issue; these trajectories need to be calculated in many places, so we're facing pervasive coupling. Suppose we instead move the sensor-related behaviors and the sensor data to its own, dedicated, cohesive, encapsulated class:</P>
 
-    def __init__(self) -> None:
-        self.people = [] # Initially empty
+      <PythonBlock fileName="sensormodule.py">{
+`from vector3 import Vector3
 
-    # Create a person named "Joe", aged 42, and add them to the
-    # list of people
-    def add_joe(self) -> None:
-        joe = Person("Joe", 42)
-        self.people.append(joe)
-        
-    # Create a person named "Liang", aged 23, and add them to the
-    # list of people
-    def add_liang(self) -> None:
-        liang = Person("Liang", 23)
-        self.people.append(liang)
-        
-    # ... And so on
-
-    # Search for joe and print their age
-    def print_joes_age(self) -> None:
-        for p in self.people:
-            if p.name == "Joe":
-                print(f"Joe's age is {p.age}")
-                return
-
-    # Search for liang and print their age
-    def print_liangs_age(self) -> None:
-        for p in self.people:
-            if p.name == "Liang":
-                print(f"Liang's age is {p.age}")
-                return
+class SensorModule:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
     
-    # ... And so on
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
 
-    # Search for people who are 42 years old and print their names
-    def print_people_who_are_42(self) -> None:
-        print('People who are 42 years of age')
-        for p in self.people:
-            if p.age == 42:
-                print(f'\\t{p.name}')
+    def query_gps(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
 `
       }</PythonBlock>
 
-      <P>Now, suppose we want to create and add Joe, age 42, to <Code>my_database</Code>. Prevously, we did it like this:</P>
+      <P>In the spirit of encapsulation, the <Code>Rocket</Code> class should no longer access the <Code>gps_flight_path</Code> attribute directly. After all, it's no longer an attribute of the <Code>Rocket</Code> class, but rather the <Code>SensorModule</Code> class, so the behaviors (methods) that operate on this attribute should strictly be encapsulated within the <Code>SensorModule</Code> class. However, the <Code>Rocket</Code> class is still responsible for actuating the fins, deploying the parachute, and conducting telemetry, and all these things still require being able to retrieve the rocket's current trajectory (position and velocity) <It>somehow</It>.</P>
 
-      <PythonBlock copyable={false} showLineNumbers={false}>{
-`joe = Person('Joe', 42)
-my_database.people.append(joe)`
+      <P>To support such capabilities while still practicing encapsulation, we can introduce a couple new methods in the <Code>SensorModule</Code> class:</P>
+
+      <PythonBlock fileName="sensormodule.py" highlightLines="{29-52}">{
+`from vector3 import Vector3
+
+class SensorModule:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+    def query_gps(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
+
+    def get_position(self) -> Vector3:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+
+        # Return
+        return current_position
+
+    def get_velocity(self) -> Vector3:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Return
+        return current_velocity
+`
       }</PythonBlock>
 
-      <P>Practicing encapsulation, we'll now do it like this instead:</P>
+      <P>The <Code>Rocket</Code> class can now use these methods to retrieve trajectory data wherever it needs it.</P>
 
-      <PythonBlock copyable={false} showLineNumbers={false}>{
-`my_database.add_joe()`
-      }</PythonBlock>
+      <P>Let's update our <Code>Rocket</Code> class now. It will no longer have its own <Code>gps_flight_path</Code> attribute. Instead, it will have an attribute of type <Code>SensorModule</Code>, which in turn encapsulates the sensor data and behaviors. Then, whenever a <Code>Rocket</Code> object needs to know its current trajectory, it will rely on the methods of its <Code>SensorModule</Code> attribute to compute it:</P>
 
-      <P>Similarly, if we want to add Liang, age 23, to a person database, we can call the <Code>add_liang()</Code> method. If we want to find and print the age of Joe, we can call the <Code>print_joes_age()</Code> method. And so on.</P>
+      <PythonBlock fileName="rocket.py" highlightLines="{1,4,8,14-20,34-40,55-61}">{
+`from sensormodule import SensorModule
 
-      <P>Again, I know the above class seems ridiculous. I'll get to that in just a second. For now, the goal is simply to avoid ever operating on (using) the <Code>people</Code> attribute from anywhere in our codebase that <It>isn't</It> a method of the <Code>PersonDatabase</Code> class. That is, the point is to practice encapsulation<Emdash/>when we want to operate on the <Code>people</Code> attribute, we do so from within a co-located (bundled) method of the very same class.</P>
-
-      <P>Okay, let's address the elephant in the room: the above class definition is clearly ridiculous. Functions are supposed to be modular and reusable. The <Code>add_joe</Code> method is clearly not very modular nor reusable. It's only useful for one extremely specific thing: adding a person named Joe, age 42, to a given person database. The <Code>add_liang</Code> method suffers from the same problem, as do all of the <Code>print_XYZ_age</Code> methods as well as the <Code>print_people_who_are_42</Code> method.</P>
-
-      <P>Indeed, these methods are ridiculous because they're not reusable, which requires us to copy and paste their internal logic whenever we want to accomplish a similar goal. But that's exactly my point: encapsulation makes all this repeated code extremely obvious. Again, to the untrained eye, <Code>my_database.people.append(joe)</Code> and <Code>my_database.people.append(liang)</Code> might not seem very problematic, even though they are (as we dicussed previously). But even a novice programmer should have no trouble recognizing how silly the <Code>print_people_who_are_42</Code> method is.</P>
-
-      <P>The natural thing to do from here is refactor the above class implementation, making its methods much more modular. Let's do that:</P>
-
-      <PythonBlock fileName="persondatabase.py">{
-`from person import Person
-
-class PersonDatabase:
-    people: list[Person]
+class Rocket:
+    sensor_module: SensorModule
+    deployed_parachute: bool
 
     def __init__(self) -> None:
-        self.people = [] # Initially empty
+        self.sensor_module = SensorModule()
 
-    # Add any given person to the database (as opposed to always 
-    # adding one hyperspecific person, such as Joe, age 42)
-    def add_person(self, p: Person) -> None:
-        self.people.append(p)
+        # Parachute initially undeployed
+        self.deployed_parachute = False
 
-    # Print the age of a person with a given name (as opposed to always
-    # searching for one hyperpsecific person)
-    def print_age_of_person(self, name: str) -> None:
-        for p in self.people:
-            if p.name == name:
-                print(f"{p.name}'s age is {p.age}")
-                return
+    def actuate_fins(self) -> None:
+        # Get rocket's current position from the sensor module via
+        # its get_position() method
+        current_position = self.sensor_module.get_position()
+        
+        # Get rocket's current velocity from the sensor module via
+        # its get_velocity() method
+        current_velocity = self.sensor_module.get_velocity()
 
-    # Search for people whose age matches a given value (as opposed to
-    # always searching for people who are one hyperspecific age, like
-    # 42).
-    def print_people_with_age(self, age: int) -> None:
-        print(f'People who are {age} years of age')
-        for p in self.people:
-            if p.age == age:
-                print(f'\\t{p.name}')
+        # Here, we would somehow use current_position and
+        # current_velocity to determine how the fins should be actuated
+        # so as to guide the rocket along the target trajectory.
+        # That's beyond the scope of this course, so use your
+        # imagination here as well.
+        # ...
+
+    def deploy_parachute_if_ready(self) -> None:
+        if self.deployed_parachute:
+            # Parachute has already been deployed. Do nothing.
+            return
+
+        # Get rocket's current position from the sensor module via
+        # its get_position() method
+        current_position = self.sensor_module.get_position()
+        
+        # Get rocket's current velocity from the sensor module via
+        # its get_velocity() method
+        current_velocity = self.sensor_module.get_velocity()
+
+        # Let's say the parachute is meant to be deployed at
+        # apogee (peak of trajectory). Let's say the y coordinate
+        # dimension represents elevation. Then we should deploy the
+        # parachute when the y coordinate of current_velocity becomes
+        # non-positive (when the rocket is no longer moving upward)
+        if current_velocity.y <= 0:
+            # Here, we would somehow engage with the hardware to
+            # deploy the parachute. Again, use your imagination.
+            # ...
+
+            self.deployed_parachute = True
+
+    def log_data(self) -> None:
+        # Get rocket's current position from the sensor module via
+        # its get_position() method
+        current_position = self.sensor_module.get_position()
+        
+        # Get rocket's current velocity from the sensor module via
+        # its get_velocity() method
+        current_velocity = self.sensor_module.get_velocity()
+
+        # Here, we would somehow send current_position and
+        # current_velocity to the ground receiver for monitoring.
+        # Use your imagination.
+        # ...
 `
       }</PythonBlock>
 
-      <P>Now, suppose we want to create and add Joe, age 42, to <Code>my_database</Code>. We could do that like so:</P>
+      <P>Perhaps this doesn't look very different from before, but we've actually already solved most of our coupling problems. Before I prove it, let's make a few more improvements to our design. In the <Code>SensorModule</Code> class, the <Code>get_velocity</Code> method starts out by retrieving the rocket's current position from the end of the GPS flight path. But, unsurprisingly, the code that does that is completely identical to the entire implementation of the <Code>get_position</Code> method. Hence, we can replace that code with a call to the <Code>get_position</Code> method:</P>
 
-      <PythonBlock copyable={false} showLineNumbers={false}>{
-`joe = Person('Joe', 42)
-my_database.add_person(joe)`
+      <PythonBlock fileName="sensormodule.py" highlightLines="{39}">{
+`from vector3 import Vector3
+
+class SensorModule:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+    def query_gps(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
+
+    def get_position(self) -> Vector3:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+
+        # Return
+        return current_position
+
+    def get_velocity(self) -> Vector3:
+        # Get rocket's current position
+        current_position = self.get_position()
+
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Return
+        return current_velocity
+`
       }</PythonBlock>
 
-      <P>Similarly, we could find and print the age of someone named Liang via <Code>my_database.print_age_of_person('Liang')</Code>; we could print the names of every aged 42 via <Code>my_database.print_people_with_age(42)</Code>; and so on.</P>
+      <P>(Yes, an object's methods can call its other methods. This is very common in complex classes that might need to reuse some logic in some places.)</P>
 
-      <P>Now all I have to do is convince you that this program design is better than what we started with, and hopefully you'll have a newfound appreciation of encapsulation. And I think that's pretty straightforward<Emdash/>let's revisit our previous example wherein we suddenly need to reimplement our searching strategy, again replacing the naive for loops with some sort of binary search, replacing the <Code>people</Code> list with two separate sorted lists, changing how we add people to a person database, and so on. Recall: in order to change how people are represented in <Code>PersonDatabase</Code>, we have to change all of the code throughout our codebase that's coupled to the <Code>people</Code> attribute. In our original program design, this would have meant changing hundreds of components of code sprawled throughout or codebase<Emdash/>components of code such as <Code>my_database.people.append(joe)</Code>, and various duplicated for loops that each searches through a database to find a person with a certain name or age.</P>
+      <P>This is better because it aligns with the DRY principle, which further reduces coupling: each line of code that directly accesses <Code>self.gps_flight_path</Code> is inherently coupled to it, so by reducing the number of lines that directly access it, we've reduced unnecessary coupling.</P>
 
-      <P>But now, things are much simpler. Now that everything's well-encapsulated, we can be confident that the only lines of code that are directly coupled to the <Code>people</Code> attribute must exist within the <Code>PersonDatabase</Code> class. After all, that's the entire point of encapsulation: behaviors that operate on data should be co-located (bundled) with that data, meaning that all functions that operate on the <Code>person</Code> attribute should be methods of the <Code>PersonDatabase</Code> class. And look<Emdash/>there's only four of them. Not hundreds of them. So if we update these four methods, that's sufficient.</P>
+      <P>Let's make one more change. As it stands, the <Code>query_gps</Code> method is a bit problematic. Consider: although encapsulation suggests that only the <Code>SensorModule</Code> class's methods should directly access the <Code>gps_flight_path</Code> attribute, encapsulation says nothing about where the <Code>query_gps</Code> method itself might be called from. In other words, <Code>query_gps</Code> exposes a <It>public interface</It> that the entire codebase might interact with. This means that it may be subject to pervasive coupling (perhaps not, but it <It>could</It> be). That'd be fine if its interface were stable, but it isn't<Emdash/>if our team's engineers were to ever modify the rocket and remove its GPS module (e.g., replacing it with an accelerometer and other sensors), then the rocket would no longer be capable of querying said GPS module, in which case we'll probably want to remove the <Code>query_gps</Code> method altogether. This would break any and all <Code>query_gps()</Code> calls throughout the codebase. That's a problem.</P>
 
-      <P>To be clear, encapsulation is not an inherent property of good software design. Rather, encapsulation is a tool that, in certain cases, can help manage coupling, and well-managed coupling is, in turn, a property of good software design. We'll revisit this idea at the end of the lecture.</P>
+      <P>The solution is to redesign our <Code>SensorModule</Code> class to expose more stable interfaces. After all, most pervasive coupling occurs at interfaces, making them hard to change, so we should design our interfaces such that they're unlikely to ever need to be changed.</P>
 
-      <SectionHeading id="private-attributes-and-methods">Private attributes and methods</SectionHeading>
+      <P>Here's a simple idea: rename <Code>query_gps</Code> to <Code>collect_sensor_data</Code>. This is essentially just a philosophical adjustment, but it's powerful. Even if the team removes the GPS module from the rocket, it will still have sensors of <It>some sort</It>, and it will still need to periodically collect data from them. So, if that day comes, we won't need to remove any methods or otherwise break any interfaces; we'll just have to update the <It>implementation</It> of the <Code>collect_sensor_data</Code> method, changing where it sources its data from and how it stores it in the object's attributes.</P>
 
-      <P>Encapsulation can be helpful toward managing coupling, but what's to stop us (or perhaps our naive coworker, or the newly hired intern) from breaking it? The whole point is that lines of code such as <Code>my_database.people.append(joe)</Code> can be problematic because they're tightly coupled to the representation of people within the <Code>PersonDatabase</Code> class (i.e., they're tightly coupled to the <Code>people</Code> attribute). And if such lines of code are sprawled throughout the entire codebase, then the representation of people suffers from tight, pervasive coupling, making it hard to change that representation should we ever need to (e.g., to support binary search, speeding up queries). Creating modular methods within the <Code>PersonDatabase</Code> class does not solve the problem<Emdash/>only removing those problematic lines of code will solve the problem. Yes, <Code>my_database.add_person(joe)</Code> serves as an <It>alternative</It> to <Code>my_database.people.append(joe)</Code>, but how do <It>prevent</It> us (or our coworker, or the intern) from writing <Code>my_database.people.append(joe)</Code> anyway? That is, how do we <It>enforce</It> encapsulation?</P>
+      <P>Here's that update for reference:</P>
+
+      <PythonBlock fileName="sensormodule.py" highlightLines="{16}">{
+`from vector3 import Vector3
+
+class SensorModule:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+    def collect_sensor_data(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
+
+    def get_position(self) -> Vector3:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+
+        # Return
+        return current_position
+
+    def get_velocity(self) -> Vector3:
+        # Get rocket's current position
+        current_position = self.get_position()
+
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Return
+        return current_velocity
+`
+      }</PythonBlock>
+
+      <P>Now, for the moment you've been waiting for. Suppose, as before, we conduct a flight test and find the GPS system to be unreliable at high altitudes, so we decide to replace it with an accelerometer. Under our previous design, this would have been difficult due to coupling. But now, look how easy it is:</P>
+
+      <PythonBlock fileName="sensormodule.py" highlightLines="{10-19,27-30,45-58,61,64}">{
+`from vector3 import Vector3
+
+class SensorModule:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+
+    # Rocket's current acceleration as sourced from the
+    # accelerometer
+    acceleration: Vector3
+
+    # We'll also keep track of a running estimate of the rocket's
+    # velocity and position, periodically updating them based on its
+    # acceleration at the given point in time (i.e., approximating
+    # velocity and position through integration).
+    velocity: Vector3
+    position: Vector3
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+        # Acceleration, velocity, and position all start as zero-vectors
+        self.acceleration = Vector3()
+        self.velocity = Vector3()
+        self.position = Vector3()
+
+    def collect_sensor_data(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
+
+        # Here, we would somehow query the rocket's current
+        # acceleration from the accelerometer and update
+        # self.acceleration accordingly
+        # Use your imagination.
+        # ...
+
+        # Now, update velocity and position accordingly (note: this is
+        # an oversimplification)
+        self.velocity.x += self.acceleration.x
+        self.velocity.y += self.acceleration.y
+        self.velocity.z += self.acceleration.z
+        self.position.x += self.velocity.x
+        self.position.y += self.velocity.y
+        self.position.z += self.velocity.z
+
+    def get_position(self) -> Vector3:
+        return self.position
+
+    def get_velocity(self) -> Vector3:
+        return self.velocity
+`
+      }</PythonBlock>
+
+      <P>Notice: The <Code>Rocket</Code> class doesn't need to be updated whatsoever. In fact, the only code that needs to be updated is what's inside the <Code>SensorModule</Code> class. Indeed, this is the entire point of encapsulation. Because the representation of our trajectory data<Emdash/><Code>gps_flight_path</Code><Emdash/>is properly encapsulated within the <Code>SensorModule</Code> class, the only code that operates on it is <It>also</It> encapsulated within the <Code>SensorModule</Code> class. Hence, changing this representation does not directly require any changes outside this class. Moreover, this is a small class that's dedicated to the single responsibility of parsing the rocket's sensor data. It's <It>not</It> responsible for the all the other things that rockets do<Emdash/>actuating the fins, deploying the parachute, conducting telemetry, and so on. So long as we keep it like that, the coupling isolated within the <Code>SensorModule</Code> class will remain manageable.</P>
+
+      <P>If we wanted to, we could even remove <Code>gps_flight_path</Code> altogether (e.g., if the team decided to remove the rocket's GPS module entirely), and we <It>still</It> wouldn't need to touch any code outside the <Code>SensorModule</Code> class.</P>
+
+      <P>That said, encapsulation does not inherently solve everything. In fact, in order to gain much of anything out of encapsulation, you must think very carefully about your class design. Our <Code>SensorModule</Code> class exposes an interface consisting of four methods: a constructor, <Code>collect_sensor_data</Code>, <Code>get_position</Code>, and <Code>get_velocity</Code>. If we were to ever modify the rocket's design so drastically that these methods' <It>interfaces</It> would need to change, rather than just their <It>implementations</It> as above, then other code outside the <Code>SensorModule</Code> class (e.g., calls to these methods) could break as well. This is precisely why we renamed <Code>query_gps</Code> to <Code>collect_sensor_data</Code> earlier; the latter provides a more stable interface. But no interface is <It>perfectly</It> stable. Every now and then, your project requirements may change drastically, and you'll simply have no choice but to change an interface or two, potentially breaking code elsewhere.</P>
+
+      <P>(The better you are at predicting future project requirements, the more stable you can make your interfaces. But nobody can perfectly predict the future, and there's also <Link href="https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it">a legitimate cost</Link> to overengineering your codebase early just for the sake of <It>possibly</It> saving some maintenance effort in the future.)</P>
+
+      <P>Moreover, reducing coupling doesn't inherently require encapsulation. Indeed, many of the changes that we made could have been done without encapsulation at all. For example, one of the biggest things we did to mitigate coupling was practice the DRY principle by moving the trajectory computations into their own dedicated methods, <Code>get_position()</Code> and <Code>get_velocity()</Code>, rather than replicating those computations everywhere. Encapsulation wasn't strictly necessary for that change. We could have very well introduced these trajectory computation methods directly in the <Code>Rocket</Code> class. Heck, we could've made them global functions (not inside any class at all), perhaps even in a completely different Python module. That still would have addressed many of the coupling issues.</P>
+
+      <P>There are also still some places in our codebase where we aren't practicing encapsulation, and maybe that's okay. For example, the <Code>Vector3</Code> class doesn't encapsulate any methods that operate on x/y/z coordinates. Instead, we treat <Code>Vector3</Code> as a POD type / passive data structure, operating on its x/y/z attributes directly from various places throughout the codebase. That isn't encapsulation, but it's probably fine. A <Code>Vector3</Code> object, by its very definition, will <It>always</It> have three coordinates, and there probably aren't many good reasons to ever change their representations. Since these attributes' representations are unlikely to ever change, maybe it's okay for the rest of the codebase to be tightly coupled to them.</P>
+
+      <P>However, practicing encapsulation when appropriate does tend to naturally <It>encourage</It> decoupling. For example, if you ever need a function that's capable of computing the current position of the rocket, the first place you'd look is the <Code>SensorModule</Code> class, and you'd quickly find the <Code>get_position</Code> method. After all, in the spirit of encapsulation, that's probably where it should be<Emdash/>co-located with the sensor data that it operates on. Even if you're not the one who wrote it, you should still be able to find it. In contrast, if you and your team <It>don't</It> practice encapsulation, then you'd have no idea where to look for such a function. And if you fail to find it, then you'll probably end up rewriting it, even if it already exists elsewhere, increasing coupling. Or, worse, you might opt to not write a dedicated function for it <It>at all</It>, instead choosing to hardcode its implementation wherever you need it, which just encourages it to be rewritten again and again. Your teammates might do the same. That's precisely how coupling sprawls out of control.</P>
+
+      <P>Similarly, proper encapsulation organizes the most tightly coupled components together. Whenever you change how the rocket's sensor data is represented, that can easily break any and all code coupled to the existing representation. But if that code is all co-located with the representation (attributes) itself, then it's easy to locate. This is especially important when the breaking change results in subtle logic errors that aren't easily detected by static analysis tools.</P>
+
+      <SectionHeading id="private-attributes">Private attributes</SectionHeading>
+
+      <P>For this section, let's again forget about the accelerometer and rewind back to when the <Code>SensorModule</Code> class only had a <Code>gps_flight_path</Code> attribute:</P>
+
+      <PythonBlock fileName="sensormodule.py">{
+`from vector3 import Vector3
+
+class SensorModule:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    gps_flight_path: list[Vector3]
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self.gps_flight_path = [Vector3()]
+
+    def collect_sensor_data(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self.gps_flight_path
+        self.gps_flight_path.append(new_position)
+
+    def get_position(self) -> Vector3:
+        # Get rocket's current position
+        current_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 1]
+
+        # Return
+        return current_position
+
+    def get_velocity(self) -> Vector3:
+        # Get rocket's current position
+        current_position = self.get_position()
+
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self.gps_flight_path[len(self.gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Return
+        return current_velocity
+`
+      }</PythonBlock>
+
+      <P>Now, encapsulation can be helpful toward managing coupling, but what's to stop us (or perhaps our naive coworker, or the newly hired intern) from breaking it? For example, expressions in the <Code>Rocket</Code> class such as <Code>self.sensor_module.gps_flight_path[len(self.sensor_module.gps_flight_path) - 1]</Code> would violate the <Code>SensorModule</Code> class's encapsulation and reintroduce coupling to its representation of trajectories. If such problematic expressions are sprawled throughout the entire codebase, then the representation of trajectories will suffer from tight, pervasive coupling, making it hard to change that representation should we ever need to (e.g., to transition from GPS-based trajectories to accelerometer-based trajectories). Indeed, creating modular methods like <Code>get_position</Code> and <Code>get_velocity</Code> within the <Code>SensorModule</Code> class does not inherently prevent pervasive coupling if we or our teammates choose to subvert these methods and access the underlying attributes directly.</P>
+
+      <P>That's to say, <Code>self.sensor_module.get_position()</Code> serves as an <It>alternative</It> to <Code>self.sensor_module.gps_flight_path[len(self.sensor_module.gps_flight_path) - 1]</Code>, and it provides a more stable interface to protect against coupling. But how do we <It>force</It> ourselves (or our coworker, or the intern) to use this nice alternative? That is, how do we <It>enforce</It> encapsulation?</P>
 
       <P>Enter <Bold>private attributes</Bold>. A private attribute is an attribute of a class that may only be accessed by methods of that very same class. The alternative to a private attribute is a public attribute, which is an attribute that may be accessed from anywhere in the codebase.</P>
 
-      <P>For example, if the <Code>people</Code> attribute was a private attribute of the <Code>PersonDatabase</Code> class (rather than a public attribute, as it is now), then it would only be accessible from within the four methods of the <Code>PersonDatabase</Code> class itself (<Code>__init__</Code>, <Code>add_person</Code>, <Code>print_age_of_person</Code>, and <Code>print_people_with_age</Code>). Hence, there would be no risk of statements such as <Code>my_database.people.append(joe)</Code> being sprawled across our entire codebase, breaking the encapsulation. That's to say, private attributes represent data (attributes) that can <It>only</It> be operated on by co-located behaviors (methods of the same class), thereby enforcing encapsulation.</P>
+      <P>For example, if the <Code>gps_flight_path</Code> attribute was a private attribute of the <Code>SensorModule</Code> class (rather than a public attribute, as it is now), then it would only be accessible from within the few, isolated methods of the <Code>SensorModule</Code> class itself. Hence, there would be no risk of expressions such as <Code>self.sensor_module.gps_flight_path[len(self.sensor_module.gps_flight_path) - 1]</Code> being sprawled across our entire codebase (e.g., in the <Code>Rocket</Code> class), breaking the encapsulation. That's to say, private attributes represent data (attributes) that can <It>only</It> be operated on by co-located behaviors (methods of the same class), thereby enforcing encapsulation.</P>
 
-      <P>In Python, a private attribute is simply an attribute whose name starts with an underscore (<Code>_</Code>). Let's update the <Code>PersonDatabase</Code> class, making the <Code>people</Code> attribute private by renaming it to <Code>_people</Code>:</P>
+      <P>In Python, a private attribute is simply an attribute whose name starts with an underscore (<Code>_</Code>). Let's update the <Code>SensorModule</Code> class, making the <Code>gps_flight_path</Code> attribute private by renaming it to <Code>_gps_flight_path</Code>:</P>
 
-      <PythonBlock fileName="persondatabase.py">{
-`from person import Person
+      <PythonBlock fileName="sensormodule.py">{
+`from vector3 import Vector3
 
-class PersonDatabase:
-    people: list[Person]
-
+class SensorModule:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    _gps_flight_path: list[Vector3]
+    
     def __init__(self) -> None:
-        self.people = [] # Initially empty
+        # Rocket is initially resting on the launch pad, so initialize
+        # _gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self._gps_flight_path = [Vector3()]
 
-    # Add any given person to the database (as opposed to always 
-    # adding one hyperspecific person, such as Joe, age 42)
-    def add_person(self, p: Person) -> None:
-        self.people.append(p)
+    def collect_sensor_data(self) -> None:
+        new_position = Vector3()
 
-    # Print the age of a person with a given name (as opposed to always
-    # searching for one hyperpsecific person)
-    def print_age_of_person(self, name: str) -> None:
-        for p in self.people:
-            if p.name == name:
-                print(f"{p.name}'s age is {p.age}")
-                return
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
 
-    # Search for people whose age matches a given value (as opposed to
-    # always searching for people who are one hyperspecific age, like
-    # 42).
-    def print_people_with_age(self, age: int) -> None:
-        print(f'People who are {age} years of age')
-        for p in self.people:
-            if p.age == age:
-                print(f'\\t{p.name}')
+        # Append new position to self._gps_flight_path
+        self._gps_flight_path.append(new_position)
+
+    def get_position(self) -> Vector3:
+        # Get rocket's current position
+        current_position = \\
+            self._gps_flight_path[len(self._gps_flight_path) - 1]
+
+        # Return
+        return current_position
+
+    def get_velocity(self) -> Vector3:
+        # Get rocket's current position
+        current_position = self.get_position()
+
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self._gps_flight_path[len(self._gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Return
+        return current_velocity
 `
       }</PythonBlock>
 
-      <P>Now, I've sort of just lied to you. In Python, there's technically no such thing as a "private attribute". However, it is well understood by the Python community, and indeed stated as guidance by the official style guide for Python code (PEP 8), that all attributes whose names start with an underscore are <It>meant</It> to be treated as private attributes and therefore <Ul>should not</Ul> be accessed from anywhere other than a method of the class that defines it (unless you're keen on getting into trouble). For example:</P>
+      <P>Now, I've sort of just lied to you. In Python, there's technically no such thing as a "private attribute". However, it is well understood by the Python community, and indeed stated as guidance by the official style guide for Python code (PEP 8), that all attributes whose names start with an underscore are <It>meant</It> to be treated as private attributes and therefore <Ul>should not</Ul> be accessed from anywhere other than within a method of the class that defines it (unless you're keen on getting into trouble). For example:</P>
 
-      <PythonBlock fileName="main.py" highlightLines="{9-10,12-13}">{
-`from person import Person
-from persondatabase import PersonDatabase
+      <PythonBlock fileName="rocket.py" highlightLines="{13-26}" showLineNumbers={false}>{
+`from sensormodule import SensorModule
 
-def main() -> None:
-    my_database = PersonDatabase()
-    
-    joe = Person('Joe', 42)
+class Rocket:
+    sensor_module: SensorModule
+    deployed_parachute: bool
 
-    # This is technically legal but extremely ill-advised:
-    my_database._people.append(joe)
+    # ... Some code omitted for brevity
 
-    # This is what you should do instead:
-    my_database.add_person(joe)
+    def actuate_fins(self) -> None:
+        # Get rocket's current position from the sensor module via
+        # its position() method
+        
+        # This is fine, and it's what you should do. It respects the
+        # encapsulation of the SensorModule class's _gps_flight_path
+        # attribute.
+        current_position = self.sensor_module.get_position()
 
-if __name__ == '__main__':
-    main()
+        # This, on the other hand, is technically legal but extremely
+        # ill-advised. _gps_flight_path is private to the SensorModule
+        # class, meaning it should only ever be directly accessed from
+        # within methods of the SensorModule class. This is a method of
+        # the Rocket class; we [technically can but] should not be
+        # accessing it here.
+        # current_position = self.sensor_module._gps_flight_path[
+        #     len(self.sensor_module._gps_flight_path) - 1
+        # ]
+        
+        # ... Some code omitted for brevity
 `
       }</PythonBlock>
 
       <P>Heed the comments: you should generally avoid accessing private attributes (attributes whose names start with an underscore) from anywhere other than within a method of the class that defines those attributes. And if you go against this advice and access those attributes anyway, understand that this couples your code to those attributes' representations, and should those representations ever change, your code will break. This is especially important when interacting with code that is not your own (e.g., code from a library, or code written by a coworker). If an attribute is private, then the person who wrote that attribute does not intend for you to access it directly. If you do, and then they change the attribute's representation, breaking your code in the process, that's <It>your</It> fault<Emdash/>not <It>theirs</It> (it also opens you up to accidentally breaking <Link href="#class-invariants">class invariants</Link>, which would also be your fault). That's to say, ignore this advice at your own peril.</P>
 
-      <P>In many other object-oriented programming languages (and programming languages that support encapsulation by other means), access to private attributes is strictly protected. Indeed, in C++, Java, C#, and countless other examples, attempting to access a private attribute from anywhere other than within a method of the class defining said attribute is considered to be a syntax error. But Python's philosophy with regards to encapsulation is a bit less "strict" (a common expression in the Python community is <Link href="https://mail.python.org/pipermail/tutor/2003-October/025932.html">"we're all consenting adults here"</Link>, meaning that you can access private attributes if you so choose, but you should know what you're getting yourself into).</P>
+      <P>In many other object-oriented programming languages (and programming languages that support encapsulation by other means), access to private class attributes is strictly protected. Indeed, in C++, Java, C#, and countless other examples, attempting to access a private class attribute from anywhere other than within a method of the class defining said attribute is considered to be a syntax error. But Python's philosophy with regards to encapsulation is a bit less strict (a common expression in the Python community is <Link href="https://mail.python.org/pipermail/tutor/2003-October/025932.html">"we're all consenting adults here"</Link>, meaning that you can access private attributes if you so choose, but you should know what you're getting yourself into).</P>
 
-      <P>Just as a leading underscore in an attribute name indicates that it it's a private attribute, the same goes for methods: a method whose name starts with an underscore is meant to be treated as a private method. The rules for private methods are the same as those for private attributes: they should not be accessed from anywhere other than within <It>other methods</It> of the very same class.</P>
+      <P>(In case you're curious, there are upsides to Python's leniency. For one, it makes it easier to employ various powerful metaprogramming techniques like <Link href="https://en.wikipedia.org/wiki/Reflective_programming">reflection</Link>, <Link href="https://en.wikipedia.org/wiki/Type_introspection">introspection</Link>, and <Link href="https://en.wikipedia.org/wiki/Monkey_patch">monkey patching</Link>. For two, it makes it possible to extract more capability out of someone else's code without rewriting it<Emdash/>even if it doesn't quite do what you need it to do, and even if its classes try to hide their information thoroughly, you can still reach inside the objects instantiated from those classes and manipulate their private attributes at will, effectively "hacking" them into doing whatever you'd like.)</P>
 
-      <P>"Accessed", in this case, basically means "called". Indeed, methods can be called by other methods. Hopefully that isn't too surprising given that I've never told you anything that would suggest otherwise. But here's an example just in case:</P>
+      <SectionHeading id="private-methods">Private methods</SectionHeading>
 
-      <PythonBlock fileName="dog.py" highlightLines="{17-22}">{
-`class Dog:
-    name: str
-    birth_year: int
+      <P>Just as a leading underscore in an attribute name indicates that it it's a private attribute, the same goes for methods: a method whose name starts with an underscore is meant to be treated as a <Bold>private method</Bold>. The rules for private methods are the same as those for private attributes: they should not be accessed from anywhere other than within <It>other methods</It> of the very same class. "Accessed", in this case, mostly means "called".</P>
 
-    def __init__(self, n: str, b: int) -> None:
-        # n is the dog's name, and b is the dog's birth year.
-        # Store them in self.name and self.birth_year
-        self.name = n
-        self.birth_year = b
+      <P>Private methods allow you to create reusable class methods without exposing them as part of the class's public interface. This is common in so-called "helper methods", which primarily exist to modularize some internal logic and assist the class's other methods. Helper methods tend to have unstable / volatile interfaces and would therefore benefit from being hidden from the external codebase to prevent tight, pervasive coupling from making them hard to change. (Moreover, using helper methods incorrectly may violate <Link href="#class-invariants">class invariants</Link>, so making them private is necessary to preserve those invariants).</P>
 
-    def bark(self) -> None:
-        print('Bark! Bark!')
+      <P>As an example, we might choose to reintroduce our <Code>query_gps</Code> method, but make it private (i.e., <Code>_query_gps</Code>) and call it in turn from <It>within</It> <Code>collect_sensor_data</Code>:</P>
 
-    def print(self) -> None:
-        print(f'{self.name} was born in {self.birth_year}')
+      <PythonBlock fileName="sensormodule.py" highlightLines="{16-41}">{
+`from vector3 import Vector3
 
-        # Call the bark() method on the calling object. To clarify: the
-        # calling object is a Dog object (it must be, given that this
-        # print() method is a method of the Dog class). All Dog objects
-        # additionally have a bark() method. That's the method that
-        # we're calling here.
-        self.bark()
+class SensorModule:
+    # This list of Vector3 objects keeps a record of the rocket's
+    # flight path so far, relative to the launch pad, as sourced from
+    # the rocket's GPS module. The last element
+    # in the list represents the rocket's current location.
+    _gps_flight_path: list[Vector3]
+    
+    def __init__(self) -> None:
+        # Rocket is initially resting on the launch pad, so initialize
+        # _gps_flight_path to contain a single Vector3 object with x, y,
+        # and z all equal to zero.
+        self._gps_flight_path = [Vector3()]
+
+    # Helper method. Called by collect_sensor_data. Modularizes the GPS
+    # querying. Should NOT be called from anywhere other than within
+    # other methods of this class.
+    def _query_gps(self) -> None:
+        new_position = Vector3()
+
+        # Here, we would somehow retrieve the rocket's current position
+        # from the GPS hardware and update the x/y/z coordinates of
+        # new_position accordingly. Of course, reading from GPS
+        # hardware is beyond the scope of this course, so just use your
+        # imagination here.
+        # ...
+
+        # Append new position to self._gps_flight_path
+        self._gps_flight_path.append(new_position)
+
+    # Public-facing. Can be called from anywhere in the codebase (e.g.,
+    # in the Rocket class)
+    def collect_sensor_data(self) -> None:
+        self._query_gps()
+
+        # Consider: If the sensor module had many other sensors (e.g.,
+        # accelerometers, gyroscopes, etc), we could call other helper
+        # methods for each of them here. This provides nice internal
+        # code organization / modularization across helper methods while
+        # keeping those methods out of the class's public interface.
+
+    def get_position(self) -> Vector3:
+        # Get rocket's current position
+        current_position = \\
+            self._gps_flight_path[len(self._gps_flight_path) - 1]
+
+        # Return
+        return current_position
+
+    def get_velocity(self) -> Vector3:
+        # Get rocket's current position
+        current_position = self.get_position()
+
+        # Approximate rocket's current velocity based on difference
+        # between last two positions
+        previous_position = \\
+            self._gps_flight_path[len(self._gps_flight_path) - 2]
+        current_velocity = Vector3()
+        current_velocity.x = current_position.x - previous_position.x
+        current_velocity.y = current_position.y - previous_position.y
+        current_velocity.z = current_position.z - previous_position.z
+
+        # Return
+        return current_velocity
 `
       }</PythonBlock>
 
-      <P>Given the above class, creating a <Code>Dog</Code> object, say <Code>spot</Code>, and executing <Code>spot.print()</Code> would print Spot's name and birth year to the terminal followed by "Bark! Bark!" as a result of the <Code>self.bark()</Code> call at the bottom of the <Code>Dog</Code> class's <Code>print</Code> method.</P>
+      <P>Because <Code>_query_gps</Code> is private (starts with an underscore), it should not be called from anywhere other than within <It>another</It> method of the <Code>SensorModule</Code> class, such as <Code>collect_sensor_data</Code>. However, it's still perfectly okay to call <Code>collect_sensor_data</Code> from within the <Code>Rocket</Code> class, as we do.</P>
 
-      <P>As I was saying, methods can be made private in the same way that attributes can be made private:</P>
-
-      <PythonBlock fileName="dog.py" highlightLines="{11,17}">{
-`class Dog:
-    name: str
-    birth_year: int
-
-    def __init__(self, n: str, b: int) -> None:
-        # n is the dog's name, and b is the dog's birth year.
-        # Store them in self.name and self.birth_year
-        self.name = n
-        self.birth_year = b
-
-    def _bark(self) -> None:
-        print('Bark! Bark!')
-
-    def print(self) -> None:
-        print(f'{self.name} was born in {self.birth_year}')
-
-        self._bark()
-`
-      }</PythonBlock>
-
-      <P>This indicates that the <Code>_bark</Code> method should not be called from anywhere other than within <It>another</It> method of the <Code>Dog</Code> class. For example, it's okay for the <Code>Dog</Code> class's <Code>print</Code> method to in turn call the <Code>_bark</Code> method, and it's okay for, say, the <Code>main()</Code> function to call <Code>spot.print()</Code>, but it would <Ul>not</Ul> be okay for the <Code>main()</Code> function to directly call <Code>spot._bark()</Code>.</P>
-
-      <P>The purpose of private methods is the same as that of private attributes. It enforces encapsulation, allowing you to change the representations of private methods (e.g., changing their names, parameter types, return types, etc) while being confident that such changes will not break anything outside the class because, outside the class, those methods should not be used directly. It can also helps with the protection of class invariants, as we'll discuss momentarily.</P>
+      <P>Private methods enforce encapsulation, just as private attributes do. Because private methods can't (or at least shouldn't) be accessed from outside the class, it's easy to change their interfaces (e.g., their names, parameter types, return types, etc) or even remove them altogether while being confident that such changes will not break anything outside the class. For example, if the team chooses to remove the GPS hardware module altogether after introducing the accelerometer, we could easily remove the <Code>_query_gps</Code> method; we'd simply have to remove all references (e.g., calls) to it within the <Code>SensorModule</Code> class. In this case, there's only one such reference.</P>
 
       <P>Important: In this course, you should never access a private attribute or method of a class from anywhere other than within a method of the very same class. Even though Python and even Mypy technically allow it, it's ill-advised, and doing so may result in a grade penalty.</P>
 
       <SectionHeading id="class-invariants">Class invariants</SectionHeading>
 
-      <P>Besides reigning in coupling, encapsulation, supported by private attributes and methods, helps with something else as well: it allows us to establish <Bold>class invariants</Bold>. To be invariant means to not change. A class invariant, then, is a property of a class<Emdash/>or rather, of an object<Emdash/>that never changes.</P>
+      <P>Besides mitigating coupling, encapsulation, supported by private attributes and methods, helps with something else as well: it allows us to establish <Bold>class invariants</Bold>. To be invariant means to not change. A class invariant, then, is a property of a class<Emdash/>or rather, of an object<Emdash/>that never changes.</P>
 
       <P>Consider a simple video game. The player might have a certain amount of hitpoints (HP; e.g., when it drops to zero, the player loses). Perhaps the player's HP can go up and down<Emdash/>up when they acquire a healing item, and down when they're attacked by an enemy. But one property should remain constant: the player's HP may never exceed some maximum value. For example, perhaps they begin the game with 10 HP, and it can never exceed that starting value. Or maybe there are opportunities for the player's max HP to be increased (e.g., by leveling up), but their HP should still not exceed their max HP at any give point in time.</P>
 
-      <P>To implement such a system, you'd surely need two separate variables: one to store the player's HP, and one to store their max HP. But how do you prevent the value of the HP variable from <It>ever</It> exceeding value of the max HP variable? Well, you have to be very careful: whenever you increase the player's HP, make sure to clip it down to the max if it would otherwise exceed that max. Fine, but if the player's HP variable is accessible from everywhere in the entire codebase, you<Emdash/>or your coworker, or the intern<Emdash/>are likely to mess up at some point. Eventually, <It>someone, somewhere</It> will write a line of code that says (for example) <Code>player.hp += 1</Code>, forgetting to clip it down to <Code>player.max_hp</Code> after the fact.</P>
+      <P>To implement such a system, you'd surely need two separate variables: one to store the player's current HP, and one to store their max HP. But how do you prevent the value of the HP variable from <It>ever</It> exceeding value of the max HP variable? Well, you have to be very careful: whenever you increase the player's HP, make sure to clip it down to the max if it would otherwise exceed that max. Fine, but if the player's HP variable is accessible from everywhere in the entire codebase, you<Emdash/>or your coworker, or the intern<Emdash/>are likely to mess up at some point. Eventually, <It>someone, somewhere</It> will write a line of code that says (for example) <Code>player.hp += 1</Code>, forgetting to clip it down to <Code>player.max_hp</Code> after the fact.</P>
 
       <P>But encapsulation, and enforcement thereof, helps prevent such bugs by establishing class invariants. Consider this simple example of a <Code>Player</Code> class implementation:</P>
 
@@ -541,7 +1344,7 @@ class Player:
 
       <SectionHeading id="getters-and-setters">Getters and setters</SectionHeading>
 
-      <P>I'd be remiss if I didn't mention and extremely common "trick" when working with encapsulation and private attributes: <Bold>getters</Bold> and <Bold>setters</Bold>. A getter is simply a method that returns ("gets") the value of a private attribute contained within an object. A setter is simply a method that allows you to modify ("sets") the value of a private attribute contained within an object. In many cases, getters start with the prefix <Code>get_</Code>, and setters start with the prefix <Code>set_</Code>. But this is by no means a requirement.</P>
+      <P>I'd be remiss if I didn't mention and extremely common "trick" when working with encapsulation and private attributes: <Bold>getters</Bold> and <Bold>setters</Bold>. A getter is simply a method that returns ("gets") a value stored within the attributes of an object. A setter is simply a method that allows you to modify ("sets") values stored within the attributes of an object. In many cases, getters start with the prefix <Code>get_</Code>, and setters start with the prefix <Code>set_</Code>. But this is by no means a requirement.</P>
 
       <P>Consider the following example:</P>
 
@@ -562,7 +1365,9 @@ class Player:
 `
       }</PythonBlock>
 
-      <P>The <Code>_radius</Code> attribute is private to the <Code>Circle</Code> class, meaning that we're not supposed to directly access it from anywhere other than within methods of the <Code>Circle</Code> class itself. But what if we <It>want</It> to be able to access it in such places, perhaps for arbitrary / flexible use cases? Then we can use the <Code>Circle</Code> class's getters and setters (they're public methods<Emdash/>not private ones<Emdash/>so we can call them from anywhere):</P>
+      <P>In general, getters often accept no arguments and return something contained within the object, whereas setters often accept an argument and store it within the object, returning nothing. But this is not a hard and fast rule; in more complicated cases, getters might accept arguments (e.g., search keys / indices), and setters might return values (e.g., references or indices for efficient subsequent retrieval).</P>
+
+      <P>Now, the <Code>_radius</Code> attribute is private to the <Code>Circle</Code> class, meaning that we're not supposed to directly access it from anywhere other than within methods of the <Code>Circle</Code> class itself. But what if we <It>want</It> to be able to access it in such places, perhaps for arbitrary / flexible use cases? Then we can use the <Code>Circle</Code> class's getters and setters (they're public methods<Emdash/>not private ones<Emdash/>so we can call them from anywhere):</P>
 
       <PythonBlock fileName="main.py" highlightLines="{7-10,12-15}">{
 `from circle import Circle
@@ -588,9 +1393,9 @@ if __name__ == '__main__':
 
       <P>A common question is, "what's the difference between making an attribute private that's accessible via getters and setters versus simply making it public to begin with?" It's an important question. Indeed, getters and setters <It>can</It> undo some of the benefits of encapsulation (some people even say they "break" encapsulation outright). That shouldn't be surprising; the idea of encapsulation is to only access attributes from within co-located methods, and making the attributes private supports that goal. Meanwhile, getters and setters allow <It>near</It> arbitrary access to an otherwise private attribute from anywhere in the entire codebase<Emdash/>that sounds like the opposite of encapsulation.</P>
 
-      <P>However, making an attribute private and accessing it via getters and setters isn't <It>quite</It> the same thing as making it public. For example, suppose that, one day, I decide that I want to modify the <Code>Circle</Code> class, replacing its <Code>_radius</Code> attribute with a <Code>_diameter</Code> attribute. This seems like an innocuous change, but once again, this will break every line of code in the codebase that directly accesses the <Code>_radius</Code> attribute. If the <Code>_radius</Code> member were public and accessed from all over the place, that could break hundreds or thousands of lines of code. But in this case, it just breaks three lines of code: one in each of the three <Code>Circle</Code> class methods. And we can fix those lines of code easily:</P>
+      <P>However, making an attribute private and accessing it via getters and setters isn't <It>quite</It> the same thing as making it public. Firstly, getters and setters provide <It>some</It> limited protection against coupling. For example, suppose that, one day, I decide that I want to modify the <Code>Circle</Code> class, replacing its <Code>_radius</Code> attribute with a <Code>_diameter</Code> attribute. This seems like an innocuous change, but once again, this will break every line of code in the codebase that directly accesses the <Code>_radius</Code> attribute. If the <Code>_radius</Code> attribute were public and accessed from all over the place, that could break hundreds or thousands of lines of code. But in this case, it just breaks three lines of code: one in each of the three <Code>Circle</Code> class methods. And we can fix those lines of code easily:</P>
 
-      <PythonBlock fileName="circle.py">{
+      <PythonBlock fileName="circle.py" highlightLines="{5,9,13}">{
 `class Circle:
     _diameter: float
     
@@ -607,43 +1412,50 @@ if __name__ == '__main__':
 `
       }</PythonBlock>
 
-      <P>Indeed, although the <Code>Circle</Code> class no longer has an attribute to store its radius, that's not to say that a circle's radius can't be <It>computed</It> from its other attributes, or that its other attributes can't be <It>computed</It> from a given radius (in this case, its <Code>_diameter</Code> attribute can be converted to or from a radius value). Hence, the <Code>get_radius</Code> and <Code>set_radius</Code> methods can be kept around, and we didn't even need to change their headers (their names, parameter lists, return types, etc); we just needed to reimplement their bodies.</P>
+      <P>Indeed, although the <Code>Circle</Code> class no longer has an attribute to store its radius, that's not to say that a circle's radius can't be <It>computed</It> from its other attributes, or that its other attributes can't be <It>computed</It> from a given radius (in this case, its <Code>_diameter</Code> attribute can be converted to or from a radius value). Hence, the <Code>get_radius</Code> and <Code>set_radius</Code> methods can be kept around, and we didn't even need to change their public interfaces (their names, parameter lists, return types, etc); we just needed to update their internal implementations. Since coupling mostly occurs at interfaces rather than implementations, this is easy.</P>
 
-      <P>In this small example, this means that <Code>main.py</Code> doesn't need to be updated whatsoever. It still works exactly as written before. Here it is again for your convenience:</P>
+      <P>In this small example, this means that <Code>main.py</Code> doesn't need to be updated whatsoever. It still works exactly as written before. That may seem like a small deal. But in a much larger program, it's a huge deal<Emdash/>only needing to make changes to the <Code>Circle</Code> class, and being able to leave the entire rest of our codebase intact, is hugely beneficial for maintainability.</P>
 
-      <PythonBlock fileName="main.py">{
-`from circle import Circle
+      <P>This is proof that using private attributes and accessing them via getters and setters can be better than using public attributes when it comes to coupling. However, again, getters and setters <It>do</It> still reduce the benefits of encapsulation because, in general, they provide <It>nearly</It> the same kind of unrestricted access as simply making the attributes public. This can, in some cases, open up the attribute to indirect, loose but pervasive coupling with the rest of the codebase. We didn't run into any issues in the above example, but there's a simple reason for that: when we changed the getters and setters, we only changed their implementations<Emdash/>not their interfaces.</P>
 
-def main() -> None:
-    # We create a circle with radius 5
-    c = Circle(5.0)
+      <P>It's not too hard to construct alternative examples where getters and setters can cause major problems. As a simple one, suppose that you want to remove an attribute from a class altogether, perhaps because you've decided that you no longer need to store its information anywhere. In such a case, if you have a getter for the attribute, then the getter cannot simply be reimplemented<Emdash/>it'd have to be removed entirely, which clearly constitutes an interface change (information cannot be retrieved, or "gotten", if it does not exist). But removing the getter would break all lines of code that call it, and since getters are (typically) public methods, they might be called from hundreds or thousands of places sprawled throughout the codebase. Indeed, this is a kind of coupling issue that can be caused by getters (setters are often even worse).</P>
 
-    # Later, suppose we want to change the circle's radius. We
-    # can't access c._radius directly, but we can call c.set_radius()
-    # to modify it
-    c.set_radius(10.0)
+      <P>But it's not just about coupling. If implemented carefully, getters and setters can preserve class invariants. Public attributes cannot. For example:</P>
 
-    # Later, suppose we want to get the circle's radius, such as to
-    # print it. We can't access c._radius directly, but we can call
-    # c.get_radius() to retrieve its current value
-    print(c.get_radius()) # Prints 10.0
+      <PythonBlock fileName="circle.py" highlightLines="{5-6,16-17}">{
+`class Circle:
+    _diameter: float
+    
+    def __init__(self, radius: float) -> None:
+        if radius <= 0:
+            raise ValueError('Circle\\'s radius must be positive')
 
-if __name__ == '__main__':
-    main()
+        self._diameter = radius * 2 # Diameter = 2 * specified radius
+
+    # Getter for the radius
+    def get_radius(self) -> float:
+        return self._diameter / 2 # Radius = diameter / 2
+
+    # Setter for the radius
+    def set_radius(self, value: float) -> None:
+        if value <= 0:
+            raise ValueError('Circle\\'s radius must be positive')
+
+        self._diameter = value * 2 # Diameter = 2 * specified radius
 `
       }</PythonBlock>
 
-      <P>That may seem like a small deal. But in a much larger program, it's a huge deal<Emdash/>only needing to make changes to the <Code>Circle</Code> class, and being able to leave the entire rest of our codebase intact, is hugely beneficial for maintainability.</P>
+      <P>Now there's no risk of having a <Code>Circle</Code> object with a non-positive radius. If <Code>_radius</Code> were public, it'd be impossible to preserve such invariants.</P>
 
-      <P>This is proof that using private attributes and accessing them via getters and setters can be better than using public attributes when it comes to coupling. However, again, getters and setters <It>do</It> still reduce the benefits of encapsulation because, in general, they provide <It>nearly</It> the same kind of unrestricted access as simply making the attributes public. This can, in some cases, open up the attribute to loose but pervasive coupling with the rest of the codebase. We didn't run into any issues in the above example, but there's a simple reason for that: when we changed the getters and setters, we only changed their implementations<Emdash/>not their interfaces. As we discussed earlier, coupling occurs at interfaces, so changing an implementation while leaving the interface alone typically does not require making any changes to external dependents.</P>
+      <P>Still, getters and setters are somewhat controversial. Some people say to avoid them when possible due to their coupling issues. The primary alternative is to carefully consider all of the things that you might want to do with a set of attributes, and design narrow, dedicated methods that do <It>just</It> those things, and nothing more. For example, instead of <Code>print(my_dog.get_name())</Code>, you might opt for <Code>my_dog.print()</Code>, which in turn executes <Code>print(self._name)</Code>. Narrow, dedicated methods can often be carefully designed such that their interfaces are fairly stable, perhaps more so than a getter's or setter's would be.</P>
 
-      <P>It's not too hard to construct alternative examples where getters and setters can cause major problems, though. As a simple one, suppose that you want to remove an attribute from a class altogether, perhaps because you've decided that you no longer need to store its information anywhere. In such a case, if you have a getter for the attribute, then the getter cannot simply be reimplemented<Emdash/>it'd have to be removed entirely, which clearly constitutes an interface change (information cannot be retrieved, or "gotten", if it does not exist). But removing the getter would break all lines of code that call it, and since getters are (typically) public methods, they might be called from hundreds or thousands of places sprawled throughout the codebase. Indeed, this is a kind of coupling issue that can be caused by getters (setters are often even worse).</P>
+      <P>Regardless, getters and setters can be useful tools. You shouldn't treat them as if they're inherently evil nor inherently good. Don't avoid them at all costs, but don't use them reflexively. Use them <It>when appropriate</It>, like all tools.</P>
 
-      <P>(Getters and setters can also break a class's invariants, especially if you're not careful about how you implement them.)</P>
+      <P>What does "appropriate" mean? Well, that's highly subjective, but perhaps you can think of getters and setters as a middle ground between full, pure encapsulation (e.g., dedicated methods that only support a few narrow operations) versus zero encapsulation (e.g., POD types with public attributes). They offer <It>some</It> limited protection against coupling and can possibly preserve class invariants while simultaneously keeping the class's interface highly flexible / supporting many use cases. So, if that's what you need<Emdash/>a highly flexible interface with some support for invariants and decoupling<Emdash/>then perhaps getters and setters make sense. For example, if you're, say, building a modding / plugin engine for a video game, its entire goal is to expose the game state in a way that allows various mods / plugins to inspect and mutate the game state in nearly arbitrary ways without breaking things. This might call for some getters and setters (or something similar) to provide such a flexible interface while still preserving some class invariants.</P>
 
-      <P>Still, getters and setters can be useful tools; don't treat them as if they're inherently evil. As in our <Code>Circle</Code> example, they can occasionally offer <It>some</It> useful protection against coupling (when compared to public attributes), even while providing nearly arbitrary access to an object's internal state. Nearly arbitrary access can be useful in some contexts (e.g., when implementing custom data structures; getters and setters are basically unavoidable in such cases since arbitrary access to a data structure's internal contents is necessary by definition).</P>
+      <P>But perhaps most importantly, before introducing a getter or setter, you should ask yourself whether its interface is likely to ever need to change. Getters and setters are often used all over the codebase, so their interfaces are <It>particularly</It> difficult to change. If you think the getter's / setter's interface would be unstable / volatile, then perhaps you should opt out and lean more heavily into encapsulation instead.</P>
 
-      <P>Given their complicated tradeoffs, exactly <It>when</It> to define getters and setters (and how to design "good classes" in general) is a complicated question, and the answer is largely a matter of opinion, so that discussion is beyond the scope of this course. But if you're curious, I have tons of thoughts on the matter, and I'd be thrilled to have a conversation with you in my office hours. And if you like to research on your own, I recommend starting with: 1) the difference between interface and implementation; 2) "Tell Dont Ask" (e.g., see <Link href="https://martinfowler.com/bliki/TellDontAsk.html">Martin Fowler's article</Link>, which I'm partial to); and 3) <Link href="https://en.wikipedia.org/wiki/SOLID">SOLID</Link>.</P>
+      <P>There's a lot more to discuss around getters and setters, but it's beyond the scope of this course. If you're curious, I have tons of thoughts on the matter, and I'd be thrilled to have a conversation with you in my office hours. And if you like to research on your own, I recommend starting with: 1) the difference between interface and implementation; 2) "Tell Dont Ask" (e.g., see <Link href="https://martinfowler.com/bliki/TellDontAsk.html">Martin Fowler's article</Link>, which I'm partial to); and 3) <Link href="https://en.wikipedia.org/wiki/SOLID">SOLID</Link>.</P>
     </>
   )
 }
