@@ -65,15 +65,22 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
       <P>We're going to start writing some Python code soon, but first we need to set up our development environment.</P>
 
       <SectionHeading id="venv">Python 3.12</SectionHeading>
-      <P>Python is such a widely-used language that it is installed by default on many operating systems, including Linux. This class will use Python 3.12 (or above), which includes some nice language features that aren't present on older versions. While we could just upgrade our system's Python interpreter version, it's not usually the best approach because the OS needs Python and we might create some side effects.</P>
+
+      <P>Python is such a widely used language that it is installed by default on many operating systems, including most Linux distributions. This class will use Python 3.12 (or above), which includes some nice language features that aren't present in older versions.</P>
+
+      <P>Connect to the ENGR servers over SSH and execute the following command:</P>
 
       <ShellBlock>{
 `module load python/3.12`
       }</ShellBlock>
 
-      <P>Now when you run <Code>python --version</Code>, you should see it print something like <Code>3.12.12</Code>. Any version above 3.12 is the right version for this class! If you want to install this version on your local machine, you probably don't have the <Code>module</Code> command available, but you can install Python 3.12 with <Code>pyenv</Code> (on Windows), <Code>apt|yum|dnf</Code> on Linux, or Homebrew on a Mac.</P>
+      <P>This teporarily enables the Python 3.12 module. Now when you run <Code>python --version</Code>, you should see it print something like <Code>3.12.12</Code>. Any version above 3.12 is the right version for this class. Note that this enabled module only applies to your <Bold>current SSH session</Bold>. If you terminate the SSH session and reconnect, you'll be downgraded back to the ENGR servers' default Python version.</P>
+
+      <P>If you want to install Python 3.12 or later on your local machine, you probably don't have the <Code>module</Code> command available, but you can install Python 3.12 with <Code>pyenv</Code> on Windows, <Code>apt|yum|dnf</Code> on Linux, or Homebrew on a Mac.</P>
 
       <SectionHeading id="venv">venv</SectionHeading>
+
+      <P><Bold>Important:</Bold> Follow the above steps and ensure that your loaded Python module version is 3.12 or later before moving on.</P>
 
       <P>We're going to install some Python development packages (specifically <Link href="#mypy">Mypy</Link>, and perhaps some others throughout the term). Trouble is, we don't have the necessary permissions to install software packages on the engineering servers.</P>
 
@@ -111,12 +118,7 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
       
       <P>(You might see double parenthesis around your venv, which is okay.) This means that your virtual environment has been activated. You can now install Python packages.</P>
 
-      <P>(If you'd ever like to undo this configuration, simply remove the line from <Code>~/.bashrc</Code> that you just added). You can also deactivate an active virtual environment by running:</P>
-
-      <ShellBlock copyable={false}>{
-`(env) guyera@flip2:cs-162$ deactivate
-guyera@flip2:cs-162$`
-      }</ShellBlock>
+      <P>(If you'd ever like to undo this configuration, simply remove the line from <Code>~/.bashrc</Code> that you just added. You can also deactivate an active virtual environment within your current SSH session by running the <Code>deactivate</Code> shel command.)</P>
 
       <SectionHeading id="mypy">Mypy</SectionHeading>
 
@@ -134,10 +136,10 @@ guyera@flip2:cs-162$`
 
       <P>Luckily, there is a way to leverage the power of static typing in a Python codebase. Although Python has a duck typing type system, it supports optional static type hints, and it can be supplemented with certain static analysis tools that get you pretty close to a C++-like static type system. <Link href="https://mypy-lang.org/index.html"><Term>Mypy</Term></Link> is one such tool, and it's essentially industry-standard at this point.</P>
       
-      <P>So, we're going to install Mypy in our Python virtual environment. Every virtual environment comes with a copy of pip, which is a recursive acronym that stands for "pip installs packages". pip is the standard Python package manager, meaning it's used to install Python packages. We will use pip to intall Mypy. Make sure your virtual environment is activated, and then execute the following shell command:</P>
+      <P>So, we're going to install Mypy in our Python virtual environment. Every virtual environment comes with a copy of pip, which is a recursive acronym that stands for "pip installs packages". pip is the standard Python package manager, meaning it's used to install Python packages. We will use pip to intall Mypy (along with `pytest` and `pexpect`, which are unrelated but will come in handy later). Make sure your virtual environment is activated, and then execute the following shell command:</P>
 
       <ShellBlock>{
-`pip install mypy`
+`pip install mypy pytest pexpect`
       }</ShellBlock>
 
       <P>Mypy is not very strict by default. However, it can be configured to be strict, and when the TAs use Mypy to verify that your code has no type errors, they will, indeed, configure it to be strict. Hence, you should do so as well so that it works the same way for you as it does for the TAs when they grade your work. Use <Code>vim</Code> to open your <Code>.bashrc</Code> file again:</P>
