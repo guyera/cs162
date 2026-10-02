@@ -82,7 +82,7 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
 
       <P><Bold>Important:</Bold> Follow the above steps and ensure that your loaded Python module version is 3.12 or later before moving on.</P>
 
-      <P>We're going to install some Python development packages (specifically <Link href="#mypy">Mypy</Link>, and perhaps some others throughout the term). Trouble is, we don't have the necessary permissions to install software packages on the engineering servers.</P>
+      <P>We're going to install some Python development packages (specifically <Link href="#mypy">Mypy</Link>, <Code>pytest</Code>, <Code>pexpect</Code>, and perhaps some others throughout the term). Trouble is, we don't have the necessary permissions to install software packages on the engineering servers.</P>
 
       <P>But there's a simple workaround. Python ships with a module called <Code>venv</Code>, which stands for <Term>Virtual Environment</Term>. Packages installed in a Python virtual environment are isolated from the rest of the system, and you have full access to every Python virtual environment that you create. Hence, Python virtual environments will allow us to install and use whatever software packages we need throughout the term. (See <Link href="https://docs.python.org/3/library/venv.html">the official docs about Python virtual environments</Link> for more info).</P>
 
@@ -120,7 +120,7 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
 
       <P>(If you'd ever like to undo this configuration, simply remove the line from <Code>~/.bashrc</Code> that you just added. You can also deactivate an active virtual environment within your current SSH session by running the <Code>deactivate</Code> shel command.)</P>
 
-      <SectionHeading id="mypy">Mypy</SectionHeading>
+      <SectionHeading id="mypy">Mypy (and other package installations)</SectionHeading>
 
       <P>The first thing you need to know about Python is that it's (sometimes infamously) known for its "duck typing" type system. This means that an object can be used in an expression so long as the object has all the methods and attributes referenced by that expression. For example, <Code>someVariable.print()</Code> is a valid Python expression so long as <Code>someVariable</Code> is an object with a method (member function) named <Code>print</Code> that has no required arguments (this will make more sense when we've covered classes, objects, and methods later on in the course). It's called "duck typing" because of the common idiom, "if it <Code>quack()</Code>'s like a <Code>Duck</Code>, then it must be a <Code>Duck</Code>". Moreover, in Python, the type of object referenced by a variable can change throughout the duration of the scope. For example, one line of code can assign <Code>x = 5</Code>, and then the next line of code can reassign <Code>x = 'Hello'</Code>, thereby changing the type of <Code>x</Code> from <Code>int</Code> to <Code>str</Code>.</P>
 
@@ -136,7 +136,7 @@ async function LectureNotes({ allPathData }: { allPathData: any }) {
 
       <P>Luckily, there is a way to leverage the power of static typing in a Python codebase. Although Python has a duck typing type system, it supports optional static type hints, and it can be supplemented with certain static analysis tools that get you pretty close to a C++-like static type system. <Link href="https://mypy-lang.org/index.html"><Term>Mypy</Term></Link> is one such tool, and it's essentially industry-standard at this point.</P>
       
-      <P>So, we're going to install Mypy in our Python virtual environment. Every virtual environment comes with a copy of pip, which is a recursive acronym that stands for "pip installs packages". pip is the standard Python package manager, meaning it's used to install Python packages. We will use pip to intall Mypy (along with `pytest` and `pexpect`, which are unrelated but will come in handy later). Make sure your virtual environment is activated, and then execute the following shell command:</P>
+      <P>So, we're going to install Mypy in our Python virtual environment. Every virtual environment comes with a copy of pip, which is a recursive acronym that stands for "pip installs packages". pip is the standard Python package manager, meaning it's used to install Python packages. We will use pip to intall Mypy (along with `pytest` and `pexpect`, which are unrelated but will be helpful for running tests later). Make sure your virtual environment is activated, and then execute the following shell command:</P>
 
       <ShellBlock>{
 `pip install mypy pytest pexpect`
