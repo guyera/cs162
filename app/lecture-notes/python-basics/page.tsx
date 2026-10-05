@@ -1543,7 +1543,7 @@ The square root of 100 is 10.0
 `from math import sqrt`
       }</PythonBlock>
 
-      <P>Once you've imported something from a module or package as above, you can use directly (i.e., <It>without</It> needing to prefix it with the name of the module or package followed by the dot operator). Here's a rewrite of our previous example using this new syntax:</P>
+      <P>Once you've imported something from a module or package as above, you can use it directly (i.e., <It>without</It> needing to prefix it with the name of the module or package followed by the dot operator). Here's a rewrite of our previous example using this new syntax:</P>
 
       <PythonBlock fileName={'imports.py'} highlightLines={'{1, 7}'}>{
 `from math import sqrt
